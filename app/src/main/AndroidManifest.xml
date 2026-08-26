@@ -34,7 +34,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.DAMN">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +44,6 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.DAMN" />
 
         <service
