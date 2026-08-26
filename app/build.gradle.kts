@@ -11,8 +11,8 @@ android {
         applicationId = "com.damn.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 12
-        versionName = "12"
+        versionCode = 13
+        versionName = "13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -55,6 +55,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("androidx.lifecycle:lifecycle-service:2.11.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("info.guardianproject.netcipher:netcipher:2.1.0")
     implementation("info.guardianproject:jtorctl:0.4.5.7")
     implementation("info.guardianproject:tor-android:0.4.9.11")
