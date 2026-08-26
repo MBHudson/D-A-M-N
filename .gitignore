@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Keystore
+*.jks
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Artifacts
+.artifacts/
+
+# Binaries
+ngrok
+ngrok.exe

@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Impact sparks -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:pathData="M12,2.2 L12,4.6 M8.6,3 L9.7,5 M15.4,3 L14.3,5" />
+    <!-- Brick rows with breach -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,6.5 h6.2 v2.9 h-6.2 Z M14.8,6.5 h6.2 v2.9 h-6.2 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,10.4 h7.2 v2.9 h-7.2 Z M15.8,10.4 h5.2 v2.9 h-5.2 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,14.3 h6.4 v2.9 h-6.4 Z M14.2,14.3 l3.4,0 l1.4,2.9 l-4.8,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,18.2 h7.4 v2.6 h-7.4 Z M12.4,18.2 h8.6 v2.6 h-8.6 Z" />
+</vector>
