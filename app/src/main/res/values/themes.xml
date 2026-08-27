@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.DAMN" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/damn_primary</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/damn_accent</item>
+        <item name="android:statusBarColor">@color/damn_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
