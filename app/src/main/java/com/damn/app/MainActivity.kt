@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         binding.natSwitch.isChecked = Prefs.isNatEnabled(this)
         binding.torSwitch.isChecked = Prefs.isTorEnabled(this)
         binding.ngrokSwitch.isChecked = Prefs.isNgrokEnabled(this)
+        binding.cloudflaredSwitch.isChecked = Prefs.isCloudflaredEnabled(this)
         updatePathLabel()
 
         binding.pickFileBtn.setOnClickListener { pickFileLauncher.launch(arrayOf("*/*")) }
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         binding.natSwitch.setOnCheckedChangeListener { _, v -> Prefs.setNatEnabled(this, v); appendLog("NAT ${if (v) "enabled" else "disabled"}") }
         binding.torSwitch.setOnCheckedChangeListener { _, v -> Prefs.setTorEnabled(this, v); appendLog("Tor ${if (v) "enabled" else "disabled"}") }
         binding.ngrokSwitch.setOnCheckedChangeListener { _, v -> Prefs.setNgrokEnabled(this, v); appendLog("Ngrok ${if (v) "enabled" else "disabled"}") }
+        binding.cloudflaredSwitch.setOnCheckedChangeListener { _, v -> Prefs.setCloudflaredEnabled(this, v); appendLog("Cloudflare ${if (v) "enabled" else "disabled"}") }
 
         binding.toggleBtn.setOnClickListener { checkAndToggle() }
         // Tap an address to copy it; tap the globe icon to open it
@@ -91,11 +93,13 @@ class MainActivity : AppCompatActivity() {
         binding.publicUrlText.setOnClickListener { copyToClipboard(binding.publicUrlText.text.toString(), "Public URL") }
         binding.onionUrlText.setOnClickListener { copyToClipboard(binding.onionUrlText.text.toString(), "Tor URL") }
         binding.ngrokUrlText.setOnClickListener { copyToClipboard(binding.ngrokUrlText.text.toString(), "Ngrok URL") }
+        binding.cloudflaredUrlText.setOnClickListener { copyToClipboard(binding.cloudflaredUrlText.text.toString(), "Cloudflare URL") }
 
         binding.copyLocalBtn.setOnClickListener { openInBrowser(binding.localUrlText.text.toString()) }
         binding.copyPublicBtn.setOnClickListener { openInBrowser(binding.publicUrlText.text.toString()) }
         binding.copyOnionBtn.setOnClickListener { openInTorBrowser(binding.onionUrlText.text.toString()) }
         binding.copyNgrokBtn.setOnClickListener { openInBrowser(binding.ngrokUrlText.text.toString()) }
+        binding.copyCloudflaredBtn.setOnClickListener { openInBrowser(binding.cloudflaredUrlText.text.toString()) }
         binding.settingsBtn.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         binding.fullscreenBtn.setOnClickListener { toggleFullscreen() }
 
@@ -270,6 +274,15 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.ngrokRow.visibility = View.GONE
             }
+
+            // Cloudflare Address
+            val cf = Prefs.getCloudflaredAddress(this)
+            if (Prefs.isCloudflaredEnabled(this)) {
+                binding.cloudflaredRow.visibility = View.VISIBLE
+                binding.cloudflaredUrlText.text = if (cf.isNotEmpty()) cf else "Cloudflare: starting..."
+            } else {
+                binding.cloudflaredRow.visibility = View.GONE
+            }
             
             binding.natStatusText.text = if (extV6 != null) "✓ IPv6 Active" else if (ext != null) getString(R.string.nat_active) else if (!Prefs.isNatEnabled(this)) "NAT off — only LAN" else "⏳ Waiting for NAT..."
         } else {
@@ -277,6 +290,7 @@ class MainActivity : AppCompatActivity() {
             binding.publicUrlText.text = "—"
             binding.onionRow.visibility = View.GONE
             binding.ngrokRow.visibility = View.GONE
+            binding.cloudflaredRow.visibility = View.GONE
             binding.natStatusText.text = ""
         }
 
@@ -284,6 +298,7 @@ class MainActivity : AppCompatActivity() {
         if (!binding.natSwitch.isPressed) binding.natSwitch.isChecked = Prefs.isNatEnabled(this)
         if (!binding.torSwitch.isPressed) binding.torSwitch.isChecked = Prefs.isTorEnabled(this)
         if (!binding.ngrokSwitch.isPressed) binding.ngrokSwitch.isChecked = Prefs.isNgrokEnabled(this)
+        if (!binding.cloudflaredSwitch.isPressed) binding.cloudflaredSwitch.isChecked = Prefs.isCloudflaredEnabled(this)
     }
 
     private fun toggleFullscreen() {

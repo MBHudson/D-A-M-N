@@ -43,6 +43,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ngrok" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cloudflare" />
     </com.google.android.material.tabs.TabLayout>
 
     <FrameLayout
@@ -469,6 +474,115 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/saveBtnNgrok"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/save"
+                    android:textSize="15sp"
+                    app:cornerRadius="14dp"
+                    style="@style/Widget.Material3.Button" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Cloudflare Tab -->
+        <ScrollView
+            android:id="@+id/tabCloudflared"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="14dp"
+                    app:cardBackgroundColor="@color/damn_card"
+                    app:strokeColor="#1E293B"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cloudflare Tunnel (cloudflared) — free, no account needed for quick tunnel"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp"
+                            android:layout_marginBottom="12dp" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Local Port"
+                            app:boxStrokeColor="@color/damn_accent"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/cfLocalPortInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textColor="@color/white" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:hint="Tunnel Token (optional — leave blank for quick *.trycloudflare.com URL)"
+                            app:endIconMode="password_toggle"
+                            app:boxStrokeColor="@color/damn_accent"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/cfTokenInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:textColor="@color/white" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/importCfBtn"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:layout_marginTop="12dp"
+                            android:text="Import cloudflared binary (from Termux / Download)"
+                            android:textSize="12sp"
+                            app:strokeColor="@color/damn_accent"
+                            android:textColor="@color/damn_accent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Status"
+                            android:textColor="#94A3B8"
+                            android:textSize="12sp"
+                            android:layout_marginTop="16dp" />
+
+                        <TextView
+                            android:id="@+id/cfStatusText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Cloudflare not active"
+                            android:textColor="#64748B"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:background="#0F172A"
+                            android:padding="8dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saveBtnCloudflared"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:text="@string/save"

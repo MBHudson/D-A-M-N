@@ -17,6 +17,7 @@ import com.damn.app.MainActivity
 import com.damn.app.R
 import com.damn.app.server.NatPortMapper
 import com.damn.app.server.NativePhpEngine
+import com.damn.app.server.CloudflaredManager
 import com.damn.app.server.NgrokManager
 import com.damn.app.server.PhpEngine
 import com.damn.app.server.PhpFileServer
@@ -77,6 +78,7 @@ class ServerService : Service() {
     private var logListener: ((String) -> Unit)? = null
     private var torManager: TorManager? = null
     private var ngrokManager: NgrokManager? = null
+    private var cloudflaredManager: CloudflaredManager? = null
 
     fun setLogListener(l: (String) -> Unit) { logListener = l; logs.forEach { l(it) } }
     fun clearLogListener() { logListener = null }
@@ -93,6 +95,7 @@ class ServerService : Service() {
         createChannel()
         torManager = TorManager(this)
         ngrokManager = NgrokManager(this)
+        cloudflaredManager = CloudflaredManager(this)
         Log.i(TAG, "service created")
     }
 
@@ -293,9 +296,14 @@ class ServerService : Service() {
                     })
                 }
 
-                // Ngrok Integration (Stub)
+                // Ngrok Integration
                 if (Prefs.isNgrokEnabled(this@ServerService)) {
                     startNgrokTunnel(port)
+                }
+
+                // Cloudflare Tunnel Integration
+                if (Prefs.isCloudflaredEnabled(this@ServerService)) {
+                    startCloudflaredTunnel(port)
                 }
 
                 updateNotification()
@@ -349,10 +357,32 @@ class ServerService : Service() {
         Prefs.setNgrokAddress(this, "")
     }
 
+    private fun startCloudflaredTunnel(port: Int) {
+        val token = Prefs.getCloudflaredToken(this)
+        if (token.isEmpty()) log("Cloudflare: starting quick tunnel (trycloudflare.com) -> 127.0.0.1:$port")
+        else log("Cloudflare: starting named tunnel -> 127.0.0.1:$port")
+        cloudflaredManager?.start(token, port,
+            onReady = { url ->
+                Prefs.setCloudflaredAddress(this, url)
+                log("Cloudflare: public URL $url")
+                log("Cloudflare tip: quick tunnels are free, no account — URL changes each restart")
+                updateNotification()
+            },
+            onError = { err -> log("Cloudflare Error: $err") },
+            onProgress = { p -> log("Cloudflare: $p") }
+        )
+    }
+
+    private fun stopCloudflaredTunnel() {
+        cloudflaredManager?.stop()
+        Prefs.setCloudflaredAddress(this, "")
+    }
+
     private fun stopServerInternal() {
         try { NatPortMapper.unmapPort(); log("NAT mapping removed") } catch (_: Exception) {}
         stopTorHiddenService()
         stopNgrokTunnel()
+        stopCloudflaredTunnel()
         externalIp = null
         externalIpV6 = null
         server?.stop(); server = null

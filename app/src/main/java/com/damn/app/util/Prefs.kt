@@ -18,11 +18,14 @@ object Prefs {
     private const val KEY_SHUTDOWN_DISCONNECT = "shutdown_disconnect"
     private const val KEY_TOR_ENABLED = "tor_enabled"
     private const val KEY_NGROK_ENABLED = "ngrok_enabled"
+    private const val KEY_CLOUDFLARED_ENABLED = "cloudflared_enabled"
     private const val KEY_ONION_PORT = "onion_port"
     private const val KEY_NGROK_TOKEN = "ngrok_token"
     private const val KEY_NGROK_DOMAIN = "ngrok_domain"
+    private const val KEY_CLOUDFLARED_TOKEN = "cloudflared_token"
     private const val KEY_ONION_ADDRESS = "onion_address"
     private const val KEY_NGROK_ADDRESS = "ngrok_address"
+    private const val KEY_CLOUDFLARED_ADDRESS = "cloudflared_address"
     private const val KEY_ONION_PRIVATE_KEY = "onion_private_key"
 
     const val THEME_SYSTEM = 0
@@ -86,6 +89,9 @@ object Prefs {
     fun isNgrokEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_NGROK_ENABLED, false)
     fun setNgrokEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_NGROK_ENABLED, v).apply() }
 
+    fun isCloudflaredEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_CLOUDFLARED_ENABLED, false)
+    fun setCloudflaredEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_CLOUDFLARED_ENABLED, v).apply() }
+
     fun getOnionPort(ctx: Context): Int = prefs(ctx).getInt(KEY_ONION_PORT, 80)
     fun setOnionPort(ctx: Context, port: Int) { prefs(ctx).edit().putInt(KEY_ONION_PORT, port).apply() }
 
@@ -95,6 +101,9 @@ object Prefs {
     fun getNgrokDomain(ctx: Context): String = prefs(ctx).getString(KEY_NGROK_DOMAIN, "") ?: ""
     fun setNgrokDomain(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_NGROK_DOMAIN, v.trim()).apply() }
 
+    fun getCloudflaredToken(ctx: Context): String = prefs(ctx).getString(KEY_CLOUDFLARED_TOKEN, "") ?: ""
+    fun setCloudflaredToken(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_CLOUDFLARED_TOKEN, v.trim()).apply() }
+
     fun getOnionAddress(ctx: Context): String = prefs(ctx).getString(KEY_ONION_ADDRESS, "") ?: ""
     fun setOnionAddress(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_ONION_ADDRESS, v).apply() }
 
@@ -103,6 +112,9 @@ object Prefs {
 
     fun getNgrokAddress(ctx: Context): String = prefs(ctx).getString(KEY_NGROK_ADDRESS, "") ?: ""
     fun setNgrokAddress(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_NGROK_ADDRESS, v).apply() }
+
+    fun getCloudflaredAddress(ctx: Context): String = prefs(ctx).getString(KEY_CLOUDFLARED_ADDRESS, "") ?: ""
+    fun setCloudflaredAddress(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_CLOUDFLARED_ADDRESS, v).apply() }
 
     fun applyTheme(ctx: Context) {
         val theme = getTheme(ctx)
