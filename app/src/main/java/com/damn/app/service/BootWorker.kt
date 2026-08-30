@@ -25,8 +25,8 @@ class BootWorker(appContext: Context, workerParams: WorkerParameters) :
         val port = Prefs.getPort(applicationContext)
         val nat = Prefs.isNatEnabled(applicationContext)
         
-        if (Build.VERSION.SDK_INT >= 35) { // Android 15+
-            Log.i("DAMN-BootWorker", "Android 15+ detected, showing start notification instead of starting service")
+        if (Build.VERSION.SDK_INT >= 34) { // Android 14+ 
+            Log.i("DAMN-BootWorker", "Android 14+ detected (restricted background starts), showing notification instead of starting service")
             showStartNotification(port, nat)
             return Result.success()
         }
