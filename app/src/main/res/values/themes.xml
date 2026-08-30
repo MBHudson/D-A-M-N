@@ -12,8 +12,15 @@
     </style>
 
     <style name="ThemeOverlay.DAMN.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="colorSurface">@color/damn_card</item>
         <item name="colorOnSurface">@color/white</item>
         <item name="colorPrimary">@color/damn_accent</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material3.Button.TextButton.Dialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Material3.Button.TextButton.Dialog</item>
+    </style>
+
+    <style name="Widget.Material3.Button.TextButton.Dialog" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/damn_accent</item>
     </style>
 </resources>
