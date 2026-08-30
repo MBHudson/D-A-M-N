@@ -263,6 +263,9 @@ class ServerService : Service() {
             log("http://127.0.0.1:$port  (loopback)")
 
             scope.launch {
+                // Ensure tunnels/NAT start *after* the core is fully marked as running
+                delay(300) 
+                
                 val webIp = FileUtils.getExternalIpViaWeb()
                 if (webIp != null) { externalIp = webIp; log("Public IP (Web): $webIp") }
                 val v6 = FileUtils.getGlobalIpv6()
