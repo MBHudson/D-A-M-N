@@ -46,4 +46,6 @@
     <string name="developer">Developer</string>
     <string name="developer_name">MBHudson</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="advanced_experimental">Advanced (Experimental)</string>
+    <string name="experimental_warning">Do you want your app to crash, because this is how you get your app to crash</string>
 </resources>

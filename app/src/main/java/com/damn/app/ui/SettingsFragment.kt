@@ -66,7 +66,18 @@ class SettingsFragment : Fragment() {
         binding.headerTor.setOnClickListener { toggle(binding.contentTor, binding.chevronTor) }
         binding.headerNgrok.setOnClickListener { toggle(binding.contentNgrok, binding.chevronNgrok) }
         binding.headerCloudflare.setOnClickListener { toggle(binding.contentCloudflare, binding.chevronCloudflare) }
-        binding.headerAdvanced.setOnClickListener { toggle(binding.contentAdvanced, binding.chevronAdvanced) }
+        binding.headerAdvanced.setOnClickListener {
+            if (binding.contentAdvanced.visibility == View.GONE) {
+                AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+                    .setTitle("Proceed?")
+                    .setMessage(R.string.experimental_warning)
+                    .setPositiveButton("Yes") { _, _ -> toggle(binding.contentAdvanced, binding.chevronAdvanced) }
+                    .setNegativeButton("No", null)
+                    .show()
+            } else {
+                toggle(binding.contentAdvanced, binding.chevronAdvanced)
+            }
+        }
         binding.headerAbout.setOnClickListener { toggle(binding.contentAbout, binding.chevronAbout) }
 
         binding.resetBtn.setOnClickListener { confirmReset() }
