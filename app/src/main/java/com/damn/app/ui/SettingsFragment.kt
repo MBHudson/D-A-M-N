@@ -66,11 +66,26 @@ class SettingsFragment : Fragment() {
         binding.headerTor.setOnClickListener { toggle(binding.contentTor, binding.chevronTor) }
         binding.headerNgrok.setOnClickListener { toggle(binding.contentNgrok, binding.chevronNgrok) }
         binding.headerCloudflare.setOnClickListener { toggle(binding.contentCloudflare, binding.chevronCloudflare) }
+        binding.headerAdvanced.setOnClickListener { toggle(binding.contentAdvanced, binding.chevronAdvanced) }
         binding.headerAbout.setOnClickListener { toggle(binding.contentAbout, binding.chevronAbout) }
 
+        binding.resetBtn.setOnClickListener { confirmReset() }
         binding.btnAboutApp.setOnClickListener { showAboutDialog() }
         binding.btnDeveloper.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N") }
         binding.btnPrivacyPolicy.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N/blob/main/PRIVACY.md") }
+    }
+
+    private fun confirmReset() {
+        AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+            .setTitle("Reset Settings")
+            .setMessage("This will reset all settings, ports and auth tokens, are you sure?")
+            .setPositiveButton("Reset") { _, _ ->
+                Prefs.reset(requireContext())
+                loadPrefs()
+                Toast.makeText(requireContext(), "Settings reset to default", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showAboutDialog() {
@@ -109,18 +124,24 @@ class SettingsFragment : Fragment() {
         binding.soundSwitch.isChecked = Prefs.isSoundAlertsEnabled(ctx)
         binding.dnsInput.setText(Prefs.getCustomDns(ctx))
 
-        binding.torLocalPortInput.setText(Prefs.getPort(ctx).toString())
+        // Advanced
+        binding.phpSwitch.isChecked = Prefs.isPhpEnabled(ctx)
+        binding.listenerSwitch.isChecked = Prefs.isListenerEnabled(ctx)
+        binding.proxyHostInput.setText(Prefs.getProxyHost(ctx))
+        binding.proxyPortInput.setText(Prefs.getProxyPort(ctx).toString())
+
+        binding.torLocalPortInput.setText(Prefs.getTorLocalPort(ctx).toString())
         binding.torOnionPortInput.setText(Prefs.getOnionPort(ctx).toString())
         val onion = Prefs.getOnionAddress(ctx)
         binding.torOnionAddressText.text = if (onion.isNotEmpty()) onion else "Not connected"
 
-        binding.ngrokLocalPortInput.setText(Prefs.getPort(ctx).toString())
+        binding.ngrokLocalPortInput.setText(Prefs.getNgrokLocalPort(ctx).toString())
         binding.ngrokTokenInput.setText(Prefs.getNgrokToken(ctx))
         binding.ngrokDomainInput.setText(Prefs.getNgrokDomain(ctx))
         val ngrokAddr = Prefs.getNgrokAddress(ctx)
         binding.ngrokStatusText.text = if (ngrokAddr.isNotEmpty()) "Ngrok active: $ngrokAddr" else "Ngrok not active"
 
-        binding.cfLocalPortInput.setText(Prefs.getPort(ctx).toString())
+        binding.cfLocalPortInput.setText(Prefs.getCfLocalPort(ctx).toString())
         binding.cfTokenInput.setText(Prefs.getCloudflaredToken(ctx))
         val cfAddr = Prefs.getCloudflaredAddress(ctx)
         binding.cfStatusText.text = if (cfAddr.isNotEmpty()) "Cloudflare active: $cfAddr" else "Cloudflare not active — leave token blank for free quick tunnel"
@@ -160,20 +181,20 @@ class SettingsFragment : Fragment() {
         Prefs.setSoundAlertsEnabled(ctx, binding.soundSwitch.isChecked)
         Prefs.setCustomDns(ctx, binding.dnsInput.text.toString())
 
-        // Determine which section expanded last? Just use visible port inputs — prioritize active? For simplicity, if any of Tor/Ngrok/CF sections visible and edited, sync port accordingly. But we keep simple: check expanded states or just use general port unchanged.
-        // If Tor port visible and different, update; if Ngrok visible, use that; else keep existing
-        var newPort: Int? = null
-        if (binding.contentTor.visibility == View.VISIBLE) newPort = binding.torLocalPortInput.text.toString().toIntOrNull()
-        if (binding.contentNgrok.visibility == View.VISIBLE) {
-            val np = binding.ngrokLocalPortInput.text.toString().toIntOrNull()
-            if (np != null) newPort = np
-        }
-        if (binding.contentCloudflare.visibility == View.VISIBLE) {
-            val cp = binding.cfLocalPortInput.text.toString().toIntOrNull()
-            // cloudflare port not directly used as alternative, ignore unless others not set
-            if (newPort == null && cp != null) newPort = cp
-        }
-        if (newPort != null && newPort in 1024..65535) Prefs.setPort(ctx, newPort)
+        // Advanced
+        Prefs.setPhpEnabled(ctx, binding.phpSwitch.isChecked)
+        Prefs.setListenerEnabled(ctx, binding.listenerSwitch.isChecked)
+        Prefs.setProxyHost(ctx, binding.proxyHostInput.text.toString())
+        Prefs.setProxyPort(ctx, binding.proxyPortInput.text.toString().toIntOrNull() ?: 8080)
+
+        val tPort = binding.torLocalPortInput.text.toString().toIntOrNull() ?: Prefs.getPort(ctx)
+        Prefs.setTorLocalPort(ctx, tPort)
+        
+        val nPort = binding.ngrokLocalPortInput.text.toString().toIntOrNull() ?: Prefs.getPort(ctx)
+        Prefs.setNgrokLocalPort(ctx, nPort)
+
+        val cPort = binding.cfLocalPortInput.text.toString().toIntOrNull() ?: Prefs.getPort(ctx)
+        Prefs.setCfLocalPort(ctx, cPort)
 
         val onionPort = binding.torOnionPortInput.text.toString().toIntOrNull() ?: 80
         Prefs.setOnionPort(ctx, onionPort)

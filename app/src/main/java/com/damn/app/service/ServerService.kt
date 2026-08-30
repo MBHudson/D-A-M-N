@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -15,13 +14,14 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.damn.app.MainActivity
 import com.damn.app.R
+import com.damn.app.server.CloudflaredManager
 import com.damn.app.server.NatPortMapper
 import com.damn.app.server.NativePhpEngine
-import com.damn.app.server.CloudflaredManager
 import com.damn.app.server.NgrokManager
 import com.damn.app.server.PhpEngine
 import com.damn.app.server.PhpFileServer
 import com.damn.app.server.SimplePhpEngine
+import com.damn.app.server.TcpForwarder
 import com.damn.app.server.TorManager
 import com.damn.app.ui.DashboardMetrics
 import com.damn.app.util.DamnVfs
@@ -83,6 +83,7 @@ class ServerService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var server: PhpFileServer? = null
+    private var forwarder: TcpForwarder? = null
     private var currentPort: Int = 8080
     private var natEnabled: Boolean = true
     private var vfs: DamnVfs? = null
@@ -98,7 +99,7 @@ class ServerService : Service() {
     fun setLogListener(l: (String) -> Unit) { logListener = l; logs.forEach { l(it) } }
     fun clearLogListener() { logListener = null }
     fun getLogs(): List<String> = logs.toList()
-    fun isRunning(): Boolean = server?.isRunning == true
+    fun isRunning(): Boolean = server?.isRunning == true || forwarder?.isRunning == true
     fun getPort(): Int = currentPort
     fun getVfs(): DamnVfs? = vfs
     fun getExternalIp(): String? = externalIp
@@ -135,7 +136,6 @@ class ServerService : Service() {
                 startServerInternal(port, nat)
             }
             else -> {
-                // started via boot or restart – use prefs if not running
                 if (server == null && Prefs.wasRunning(this) && Prefs.hasHost(this)) {
                     startServerInternal(Prefs.getPort(this), Prefs.isNatEnabled(this))
                 }
@@ -160,16 +160,15 @@ class ServerService : Service() {
     }
 
     private fun startServerInternal(port: Int, nat: Boolean) {
-        if (server?.isRunning == true && port == currentPort) {
+        if (isRunning() && port == currentPort) {
             log("already running on $port")
             return
         }
-        // stop previous if port changed
         stopServerInternal()
 
         val uri = Prefs.getHostUri(this)
-        if (uri == null) {
-            log("no hosted path selected")
+        if (uri == null && Prefs.isPhpEnabled(this)) {
+            log("no hosted path selected for PHP server")
             return
         }
         currentPort = port
@@ -178,12 +177,11 @@ class ServerService : Service() {
         Prefs.setNatEnabled(this, nat)
 
         val label = Prefs.getHostLabel(this).ifEmpty { "host" }
-        // Start notification first (foreground required)
         try {
             startForeground(NOTIF_ID, buildNotification(getString(R.string.notif_text, label, port)))
         } catch (e: Exception) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is android.app.ForegroundServiceStartNotAllowedException) {
-                log("Foreground service start not allowed from background: ${e.message}")
+                log("Foreground service start not allowed: ${e.message}")
                 stopSelf()
                 return
             }
@@ -191,74 +189,75 @@ class ServerService : Service() {
         }
 
         scope.launch {
-            log("preparing virtual file system for $label ...")
-            val currentVfs: DamnVfs = try {
-                if (Prefs.isHostSingleFile(this@ServerService)) {
-                    // For single files, we still copy to cache for simplicity and performance
-                    val root = FileUtils.copyUriToCache(this@ServerService, uri, label)
-                    FileVfs(root)
-                } else {
-                    // For folders, use DocumentVfs to avoid 10GB copies
-                    DocumentVfs(this@ServerService, uri)
+            val cacheDir = File(cacheDir, "damn_host").apply { if (!exists()) mkdirs() }
+            
+            val currentVfs: DamnVfs? = if (uri != null) {
+                try {
+                    if (Prefs.isHostSingleFile(this@ServerService)) {
+                        val root = FileUtils.copyUriToCache(this@ServerService, uri, label)
+                        FileVfs(root)
+                    } else {
+                        DocumentVfs(this@ServerService, uri)
+                    }
+                } catch (e: Exception) {
+                    log("VFS init failed: ${e.message}")
+                    null
                 }
-            } catch (e: Exception) {
-                log("VFS init failed: ${e.message}")
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                return@launch
-            }
+            } else null
+            
             vfs = currentVfs
-            log("VFS ready: ${currentVfs.getRootName()}")
 
-            val localIp = FileUtils.getLocalIp(this@ServerService)
+            if (Prefs.isPhpEnabled(this@ServerService) && currentVfs != null) {
+                log("Starting PHP Server for $label ...")
+                val phpBin = listOf(
+                    File(applicationInfo.nativeLibraryDir, "libphp.so").absolutePath,
+                    NativeUtils.getBinaryPath(this@ServerService, "php")
+                ).firstOrNull { it != null && probeBinary(it) }
 
-            // Start HTTP server
-            val phpBin = listOf(
-                File(applicationInfo.nativeLibraryDir, "libphp.so").absolutePath,
-                NativeUtils.getBinaryPath(this@ServerService, "php")
-            ).firstOrNull { it != null && probeBinary(it) }
+                val engine: PhpEngine = if (phpBin != null) {
+                    log("Native PHP engine initialized: $phpBin")
+                    NativePhpEngine(phpBin)
+                } else {
+                    log("Native PHP unavailable, using Simple engine.")
+                    SimplePhpEngine()
+                }
 
-            val engine: PhpEngine = if (phpBin != null) {
-                log("Native PHP engine initialized: $phpBin")
-                NativePhpEngine(phpBin)
+                val pass = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getPassword(this@ServerService) else null
+                val srv = PhpFileServer(currentVfs, port, engine, pass, cacheDir, {
+                    lastActivityTime = System.currentTimeMillis()
+                }) { msg -> log(msg) }
+                try {
+                    srv.start()
+                    server = srv
+                } catch (e: Exception) {
+                    log("failed to bind PHP port $port: ${e.message}")
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    return@launch
+                }
+            } else if (Prefs.isListenerEnabled(this@ServerService)) {
+                val proxyHost = Prefs.getProxyHost(this@ServerService).ifEmpty { "127.0.0.1" }
+                val proxyPort = Prefs.getProxyPort(this@ServerService)
+                log("Starting Listener: $port -> $proxyHost:$proxyPort")
+                val fwd = TcpForwarder(port, proxyHost, proxyPort) { msg -> log(msg) }
+                try {
+                    fwd.start()
+                    forwarder = fwd
+                } catch (e: Exception) {
+                    log("failed to bind Listener port $port: ${e.message}")
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    return@launch
+                }
             } else {
-                log("Native PHP unavailable, using Simple engine.")
-                SimplePhpEngine()
+                log("PHP and Listener both OFF. Background service active without core server.")
             }
-
-            val pass = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getPassword(this@ServerService) else null
-            val srv = PhpFileServer(currentVfs, port, engine, pass, cacheDir, {
-                lastActivityTime = System.currentTimeMillis()
-            }) { msg -> log(msg) }
-            try {
-                srv.start()
-            } catch (e: Exception) {
-                log("failed to bind port $port: ${e.message}")
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                return@launch
-            }
-            server = srv
+            
             Prefs.setWasRunning(this@ServerService, true)
             lastActivityTime = System.currentTimeMillis()
             try { DashboardMetrics.start(this@ServerService) } catch (_: Exception) {}
 
-            // Shutdown watchdog
-            scope.launch {
-                while (server?.isRunning == true) {
-                    delay(10000)
-                    if (Prefs.isShutdownOnDisconnect(this@ServerService)) {
-                        val idle = System.currentTimeMillis() - lastActivityTime
-                        if (idle > 60000) {
-                            log("Shutting down due to inactivity")
-                            stopSelf()
-                            break
-                        }
-                    }
-                }
-            }
-            log("http://$localIp:$port  (local)")
+            log("http://${FileUtils.getLocalIp(this@ServerService)}:$port  (local)")
             log("http://127.0.0.1:$port  (loopback)")
 
-            // NAT & IP Discovery
             scope.launch {
                 val webIp = FileUtils.getExternalIpViaWeb()
                 if (webIp != null) { externalIp = webIp; log("Public IP (Web): $webIp") }
@@ -269,7 +268,6 @@ class ServerService : Service() {
                 if (Prefs.isTorEnabled(this@ServerService)) toggleTor(true)
                 if (Prefs.isNgrokEnabled(this@ServerService)) toggleNgrok(true)
                 if (Prefs.isCloudflaredEnabled(this@ServerService)) toggleCloudflare(true)
-                
                 updateNotification()
             }
         }
@@ -277,14 +275,9 @@ class ServerService : Service() {
 
     private fun probeBinary(path: String): Boolean = try {
         val p = ProcessBuilder(path, "--version").start()
-        val firstLine = p.inputStream.bufferedReader().readLine()
         val ok = p.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
-        if (ok) log("PHP probe: ${firstLine ?: "ok"}")
         ok
-    } catch (e: Exception) {
-        Log.w(TAG, "PHP probe failed for $path: ${e.message}")
-        false
-    }
+    } catch (e: Exception) { false }
 
     fun toggleNat(enable: Boolean) {
         natEnabled = enable
@@ -314,22 +307,23 @@ class ServerService : Service() {
 
     fun toggleNgrok(enable: Boolean) {
         if (!isRunning()) return
-        if (enable) startNgrokTunnel(currentPort) else stopNgrokTunnel()
+        if (enable) startNgrokTunnel(Prefs.getNgrokLocalPort(this)) else stopNgrokTunnel()
     }
 
     fun toggleCloudflare(enable: Boolean) {
         if (!isRunning()) return
-        if (enable) startCloudflaredTunnel(currentPort) else stopCloudflaredTunnel()
+        if (enable) startCloudflaredTunnel(Prefs.getCfLocalPort(this)) else stopCloudflaredTunnel()
     }
 
     private fun startTorHiddenService() {
         if (!isRunning()) return
-        log("Tor: Starting internal instance...")
+        val tPort = Prefs.getTorLocalPort(this)
+        log("Tor: Starting internal instance for local port $tPort...")
         scope.launch {
             torManager?.start({
                 System.setProperty("socksProxyHost", "127.0.0.1")
                 System.setProperty("socksProxyPort", "9050")
-                torManager?.addHiddenService(currentPort, Prefs.getOnionPort(this@ServerService), { url ->
+                torManager?.addHiddenService(tPort, Prefs.getOnionPort(this@ServerService), { url ->
                     log("Tor ready: $url")
                     Prefs.setOnionAddress(this@ServerService, url)
                     updateNotification()
@@ -349,49 +343,27 @@ class ServerService : Service() {
 
     private fun startNgrokTunnel(port: Int) {
         val token = Prefs.getNgrokToken(this)
-        if (token.isBlank()) {
-            log("Ngrok: No Auth Token provided in settings.")
-            return
-        }
+        if (token.isBlank()) { log("Ngrok: No Auth Token provided."); return }
         val domain = Prefs.getNgrokDomain(this)
-        if (domain.isNotEmpty()) log("Ngrok: starting tunnel for $domain -> 127.0.0.1:$port")
         ngrokManager?.start(token, domain, port,
-            onReady = { url ->
-                Prefs.setNgrokAddress(this, url)
-                log("Ngrok: public URL $url")
-                log("Ngrok tip: free URLs show a one-click 'Visit Site' warning page first.")
-                updateNotification()
-            },
+            onReady = { url -> Prefs.setNgrokAddress(this, url); log("Ngrok: public URL $url"); updateNotification() },
             onError = { err -> log("Ngrok Error: $err") },
             onProgress = { p -> log("Ngrok: $p") }
         )
     }
 
-    private fun stopNgrokTunnel() {
-        ngrokManager?.stop()
-        Prefs.setNgrokAddress(this, "")
-    }
+    private fun stopNgrokTunnel() { ngrokManager?.stop(); Prefs.setNgrokAddress(this, "") }
 
     private fun startCloudflaredTunnel(port: Int) {
         val token = Prefs.getCloudflaredToken(this)
-        if (token.isEmpty()) log("Cloudflare: starting quick tunnel (trycloudflare.com) -> 127.0.0.1:$port")
-        else log("Cloudflare: starting named tunnel -> 127.0.0.1:$port")
         cloudflaredManager?.start(token, port,
-            onReady = { url ->
-                Prefs.setCloudflaredAddress(this, url)
-                log("Cloudflare: public URL $url")
-                log("Cloudflare tip: quick tunnels are free, no account — URL changes each restart")
-                updateNotification()
-            },
+            onReady = { url -> Prefs.setCloudflaredAddress(this, url); log("Cloudflare: public URL $url"); updateNotification() },
             onError = { err -> log("Cloudflare Error: $err") },
             onProgress = { p -> log("Cloudflare: $p") }
         )
     }
 
-    private fun stopCloudflaredTunnel() {
-        cloudflaredManager?.stop()
-        Prefs.setCloudflaredAddress(this, "")
-    }
+    private fun stopCloudflaredTunnel() { cloudflaredManager?.stop(); Prefs.setCloudflaredAddress(this, "") }
 
     private fun stopServerInternal() {
         try { NatPortMapper.unmapPort(); log("NAT mapping removed") } catch (_: Exception) {}
@@ -401,10 +373,10 @@ class ServerService : Service() {
         externalIp = null
         externalIpV6 = null
         server?.stop(); server = null
+        forwarder?.stop(); forwarder = null
         Prefs.setWasRunning(this, false)
         try { DashboardMetrics.stop() } catch (_: Exception) {}
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Exception) {}
-        // keep logs but note
         if (vfs != null) log("server stopped")
     }
 
@@ -412,7 +384,6 @@ class ServerService : Service() {
         val label = Prefs.getHostLabel(this).ifEmpty { "D·A·M·N" }
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         try { nm.notify(NOTIF_ID, buildNotification(getString(R.string.notif_text, label, currentPort))) } catch (_: Exception) {}
-        // also broadcast?
         sendBroadcast(Intent("com.damn.app.SERVER_STATUS").apply { `package` = packageName })
     }
 
@@ -421,6 +392,5 @@ class ServerService : Service() {
         logs.add(msg)
         if (logs.size > 400) logs.removeAt(0)
         logListener?.invoke(msg)
-        // keep persistent notification updated for important logs?
     }
 }

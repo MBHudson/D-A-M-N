@@ -167,6 +167,8 @@ class DashboardFragment : Fragment() {
             val hostN = nodes["host"] ?: return
             val engN = nodes["engine"] ?: return
             val dnsN = nodes["dns"] ?: return
+            val phpEnabled = Prefs.isPhpEnabled(ctx)
+            val listenerEnabled = Prefs.isListenerEnabled(ctx)
 
             // Top: INTERNET -> TUNNELS
             topRow.addView(createEndpoint(false, worldIp))
@@ -179,12 +181,21 @@ class DashboardFragment : Fragment() {
             // Middle: Firewall
             midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = true))
 
-            // Bottom: NAT -> PHP ENGINE -> HOST -> YOU
+            // Bottom: NAT -> (PHP ENGINE OR LISTENER) -> HOST -> YOU
             bottomRow.addView(createNode("NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
             bottomRow.addView(createAnimatedConnector("live", true))
-            bottomRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
-            bottomRow.addView(createAnimatedConnector(hostN.color, true))
-            bottomRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
+            
+            if (phpEnabled) {
+                bottomRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+                bottomRow.addView(createAnimatedConnector(hostN.color, true))
+                bottomRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
+            } else if (listenerEnabled) {
+                val proxyHost = Prefs.getProxyHost(ctx).ifEmpty { "127.0.0.1" }
+                val proxyPort = Prefs.getProxyPort(ctx)
+                val proxyNode = engN.copy(ip = "$proxyHost:$proxyPort")
+                bottomRow.addView(createNode("Listener", "$proxyHost:$proxyPort", proxyNode, isFirewall = false, iconType = "router", hidePing = false, isRunning = true))
+            }
+            
             bottomRow.addView(createAnimatedConnector("live", true))
             bottomRow.addView(createEndpoint(true, youIp))
         }

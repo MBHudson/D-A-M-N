@@ -30,6 +30,13 @@ object Prefs {
     private const val KEY_FORCE_PORTRAIT = "force_portrait"
     private const val KEY_CUSTOM_DNS = "custom_dns"
     private const val KEY_SOUND_ALERTS = "sound_alerts"
+    private const val KEY_PHP_ENABLED = "php_enabled"
+    private const val KEY_LISTENER_ENABLED = "listener_enabled"
+    private const val KEY_PROXY_HOST = "proxy_host"
+    private const val KEY_PROXY_PORT = "proxy_port"
+    private const val KEY_TOR_LOCAL_PORT = "tor_local_port"
+    private const val KEY_NGROK_LOCAL_PORT = "ngrok_local_port"
+    private const val KEY_CF_LOCAL_PORT = "cf_local_port"
 
     const val THEME_SYSTEM = 0
     const val THEME_LIGHT = 1
@@ -129,6 +136,31 @@ object Prefs {
 
     fun isSoundAlertsEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_SOUND_ALERTS, false)
     fun setSoundAlertsEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_SOUND_ALERTS, v).apply() }
+
+    fun isPhpEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_PHP_ENABLED, true)
+    fun setPhpEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_PHP_ENABLED, v).apply() }
+
+    fun isListenerEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_LISTENER_ENABLED, false)
+    fun setListenerEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_LISTENER_ENABLED, v).apply() }
+
+    fun getProxyHost(ctx: Context): String = prefs(ctx).getString(KEY_PROXY_HOST, "") ?: ""
+    fun setProxyHost(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_PROXY_HOST, v.trim()).apply() }
+
+    fun getProxyPort(ctx: Context): Int = prefs(ctx).getInt(KEY_PROXY_PORT, 8080)
+    fun setProxyPort(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_PROXY_PORT, v).apply() }
+
+    fun getTorLocalPort(ctx: Context): Int = prefs(ctx).getInt(KEY_TOR_LOCAL_PORT, getPort(ctx))
+    fun setTorLocalPort(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_TOR_LOCAL_PORT, v).apply() }
+
+    fun getNgrokLocalPort(ctx: Context): Int = prefs(ctx).getInt(KEY_NGROK_LOCAL_PORT, getPort(ctx))
+    fun setNgrokLocalPort(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_NGROK_LOCAL_PORT, v).apply() }
+
+    fun getCfLocalPort(ctx: Context): Int = prefs(ctx).getInt(KEY_CF_LOCAL_PORT, getPort(ctx))
+    fun setCfLocalPort(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_CF_LOCAL_PORT, v).apply() }
+
+    fun reset(ctx: Context) {
+        prefs(ctx).edit().clear().apply()
+    }
 
     fun applyTheme(ctx: Context) {
         val theme = getTheme(ctx)
