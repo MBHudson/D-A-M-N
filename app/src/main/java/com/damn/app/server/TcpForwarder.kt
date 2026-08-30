@@ -51,14 +51,21 @@ class TcpForwarder(
     }
 
     private fun handleClient(clientSocket: Socket) {
-        try {
-            val targetSocket = Socket(targetHost, targetPort)
-            // Bi-directional copy
-            pool.execute { copyStream(clientSocket.getInputStream(), targetSocket.getOutputStream()) }
-            pool.execute { copyStream(targetSocket.getInputStream(), clientSocket.getOutputStream()) }
-        } catch (e: Exception) {
-            log("Forwarding failed: ${e.message}")
-            try { clientSocket.close() } catch (_: Exception) {}
+        pool.execute {
+            try {
+                val targetSocket = Socket(targetHost, targetPort)
+                val c2t = pool.submit { copyStream(clientSocket.getInputStream(), targetSocket.getOutputStream()) }
+                val t2c = pool.submit { copyStream(targetSocket.getInputStream(), clientSocket.getOutputStream()) }
+                
+                // Wait for both directions to finish
+                try { c2t.get(); t2c.get() } catch (_: Exception) {}
+                
+                try { targetSocket.close() } catch (_: Exception) {}
+                try { clientSocket.close() } catch (_: Exception) {}
+            } catch (e: Exception) {
+                log("Forwarding failed: ${e.message}")
+                try { clientSocket.close() } catch (_: Exception) {}
+            }
         }
     }
 
@@ -70,10 +77,9 @@ class TcpForwarder(
                 output.write(buf, 0, n)
                 output.flush()
             }
+        } catch (e: java.net.SocketException) {
+            // "Socket closed" or "Read interrupted" is expected when the other side closes
         } catch (_: Exception) {
-        } finally {
-            try { input.close() } catch (_: Exception) {}
-            try { output.close() } catch (_: Exception) {}
         }
     }
 

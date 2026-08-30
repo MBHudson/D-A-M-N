@@ -299,7 +299,13 @@ class PhpFileServer(
     private fun readHttpLine(input: java.io.InputStream): String? {
         val sb = StringBuilder()
         while (true) {
-            val b = try { input.read() } catch (_: Exception) { return if (sb.isEmpty()) null else sb.toString() }
+            val b = try { 
+                input.read() 
+            } catch (e: java.net.SocketException) {
+                return if (sb.isEmpty()) null else sb.toString().trimEnd('\r')
+            } catch (_: Exception) { 
+                return if (sb.isEmpty()) null else sb.toString().trimEnd('\r') 
+            }
             if (b == -1 || b == '\n'.code) return if (sb.isEmpty() && b == -1) null else sb.toString().trimEnd('\r')
             sb.append(b.toChar())
             if (sb.length > 8192) return sb.toString()
