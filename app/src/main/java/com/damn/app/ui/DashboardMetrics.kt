@@ -39,6 +39,9 @@ object DashboardMetrics {
     private val _ips = MutableStateFlow(Pair("—","—")) // you, world
     val ips: StateFlow<Pair<String,String>> = _ips
 
+    private val _isRunningFlow = MutableStateFlow(false)
+    val isRunningFlow: StateFlow<Boolean> = _isRunningFlow
+
     private val _speedDown = MutableStateFlow("—")
     val speedDown: StateFlow<String> = _speedDown
     private val _speedUp = MutableStateFlow("—")
@@ -88,6 +91,7 @@ object DashboardMetrics {
     fun start(ctx: Context) {
         if (running) return
         running = true
+        _isRunningFlow.value = true
         appContext = ctx.applicationContext
         lastRx = TrafficStats.getTotalRxBytes().takeIf { it != TrafficStats.UNSUPPORTED.toLong() } ?: 0L
         lastTx = TrafficStats.getTotalTxBytes().takeIf { it != TrafficStats.UNSUPPORTED.toLong() } ?: 0L
@@ -115,6 +119,7 @@ object DashboardMetrics {
 
     fun stop() {
         running = false
+        _isRunningFlow.value = false
         trafficJob?.cancel()
         pingJob?.cancel()
         ipJob?.cancel()

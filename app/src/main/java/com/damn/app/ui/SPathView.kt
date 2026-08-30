@@ -23,6 +23,19 @@ class SPathView @JvmOverloads constructor(ctx: Context, attrs: AttributeSet? = n
     private var phase = 0f
     private var animator: ValueAnimator? = null
     private var firewallColor = "green"
+    private var isAnimating = true
+
+    fun setAnimating(anim: Boolean) {
+        isAnimating = anim
+        if (anim) {
+            if (animator?.isStarted != true) animator?.start()
+        } else {
+            animator?.cancel()
+            phase = 0f
+            paint.pathEffect = DashPathEffect(floatArrayOf(14f, 10f), 0f)
+            invalidate()
+        }
+    }
 
     fun setFirewallColor(c: String) {
         firewallColor = c

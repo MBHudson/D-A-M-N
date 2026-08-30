@@ -23,6 +23,19 @@ class FlowConnectorView @JvmOverloads constructor(ctx: Context, attrs: Attribute
     }
     private var phase = 0f
     private var animator: ValueAnimator? = null
+    private var isAnimating = true
+
+    fun setAnimating(anim: Boolean) {
+        isAnimating = anim
+        if (anim) {
+            if (animator?.isStarted != true) animator?.start()
+        } else {
+            animator?.cancel()
+            phase = 0f
+            paint.pathEffect = DashPathEffect(floatArrayOf(10f, 8f), 0f)
+            invalidate()
+        }
+    }
 
     fun setColor(c: Int) {
         color = c

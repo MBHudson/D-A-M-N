@@ -101,6 +101,7 @@ class DashboardFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { DashboardMetrics.nodes.collect { renderRouting(it) } }
+                launch { DashboardMetrics.isRunningFlow.collect { renderRouting(DashboardMetrics.nodes.value) } }
                 launch { DashboardMetrics.pingHist.collect { updatePingChart(it) } }
                 launch { DashboardMetrics.traffic.collect { (ins, outs) ->
                     if (_binding != null) binding.trafficSpark.setData(ins, outs)
@@ -141,6 +142,7 @@ class DashboardFragment : Fragment() {
         val customDns = try { Prefs.getCustomDns(ctx).takeIf { it.isNotBlank() } ?: "127.0.0.1 • dns" } catch (_:Exception){"127.0.0.1 • dns"}
         val youIp = DashboardMetrics.ips.value.first
         val worldIp = DashboardMetrics.ips.value.second
+        val isRunning = ServerService.instance?.isRunning() == true
 
         // Prepare purple overrides for firewall & NAT
         val fwRaw = nodes["firewall"] ?: return
@@ -155,17 +157,17 @@ class DashboardFragment : Fragment() {
 
         // Top row: YOU → HOST FILES (phone) → PHP ENGINE → DNS (router)
         topRow.addView(createEndpoint(true, youIp))
-        topRow.addView(createAnimatedConnector("live"))
-        topRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, iconType = "phone"))
-        topRow.addView(createAnimatedConnector(hostN.color))
-        topRow.addView(createNode("PHP Engine", "localhost:$port", engN, iconType = "default"))
-        topRow.addView(createAnimatedConnector(engN.color))
+        topRow.addView(createAnimatedConnector("live", isRunning))
+        topRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = isRunning))
+        topRow.addView(createAnimatedConnector(hostN.color, isRunning))
+        topRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = isRunning))
+        topRow.addView(createAnimatedConnector(engN.color, isRunning))
         // DNS with router icon
         val dnsPurple = dnsN.copy() // keep original color but icon router
-        topRow.addView(createNode("DNS / Loopback", customDns, dnsPurple, iconType = "router"))
+        topRow.addView(createNode("DNS / Loopback", customDns, dnsPurple, isFirewall = false, iconType = "router", hidePing = false, isRunning = isRunning))
 
         // Middle: firewall with DAMN icon + glitch animation, label FIREWALL already via sub
-        midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn"))
+        midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = isRunning))
 
         // Bottom: NAT (purple, no ping, router icon), then others
         val order = listOf(
@@ -177,16 +179,17 @@ class DashboardFragment : Fragment() {
         var first = true
         order.forEach { (k, pair) ->
             val (label, n) = pair
-            if (!first) bottomRow.addView(createAnimatedConnector("live"))
+            if (!first) bottomRow.addView(createAnimatedConnector("live", isRunning))
             first = false
             val icon = if (k == "nat") "router" else "default"
             // For NAT, hide ping will be handled inside createNode via hidePing flag
             val hidePing = (k == "nat")
-            bottomRow.addView(createNode(label, n.ip, n, iconType = icon, hidePing = hidePing))
+            bottomRow.addView(createNode(label, n.ip, n, isFirewall = false, iconType = icon, hidePing = hidePing, isRunning = isRunning))
         }
-        bottomRow.addView(createAnimatedConnector("live"))
+        bottomRow.addView(createAnimatedConnector("live", isRunning))
         bottomRow.addView(createEndpoint(false, worldIp))
 
+        binding.sPathView.setAnimating(isRunning)
         binding.routingContainer.post { updateSPath() }
     }
 
@@ -217,7 +220,7 @@ class DashboardFragment : Fragment() {
         sView.updatePath(startX, startY, fwTopX, fwTopY, fwBottomX, fwBottomY, endX, endY)
     }
 
-    private fun createNode(title: String, sub: String, info: DashboardMetrics.NodeInfo, isFirewall: Boolean = false, iconType: String = "default", hidePing: Boolean = false): View {
+    private fun createNode(title: String, sub: String, info: DashboardMetrics.NodeInfo, isFirewall: Boolean = false, iconType: String = "default", hidePing: Boolean = false, isRunning: Boolean = true): View {
         val ctx = context ?: return View(requireContext())
         // sizing: firewall 20% smaller than previous 88 -> 70, others 10% smaller 88->79, padding/icon/text scaled accordingly
         val isFw = isFirewall
@@ -297,63 +300,65 @@ class DashboardFragment : Fragment() {
         inner.addView(icon)
 
         // icon animations
-        when (iconType) {
-            "router", "phone" -> {
-                // subtle pulse / routing animation
-                val pulse = ObjectAnimator.ofFloat(icon, "alpha", 1f, 0.6f, 1f).apply {
-                    duration = 1100
-                    repeatCount = ValueAnimator.INFINITE
-                    interpolator = LinearInterpolator()
-                }
-                pulse.start()
-                // also slight scale for router to mimic activity
-                if (iconType == "router") {
-                    ValueAnimator.ofFloat(1f, 1.06f, 1f).apply {
-                        duration = 900
+        if (isRunning) {
+            when (iconType) {
+                "router", "phone" -> {
+                    // subtle pulse / routing animation
+                    val pulse = ObjectAnimator.ofFloat(icon, "alpha", 1f, 0.6f, 1f).apply {
+                        duration = 1100
                         repeatCount = ValueAnimator.INFINITE
-                        addUpdateListener { v ->
-                            val s = v.animatedValue as Float
-                            icon.scaleX = s; icon.scaleY = s
+                        interpolator = LinearInterpolator()
+                    }
+                    pulse.start()
+                    // also slight scale for router to mimic activity
+                    if (iconType == "router") {
+                        ValueAnimator.ofFloat(1f, 1.06f, 1f).apply {
+                            duration = 900
+                            repeatCount = ValueAnimator.INFINITE
+                            addUpdateListener { v ->
+                                val s = v.animatedValue as Float
+                                icon.scaleX = s; icon.scaleY = s
+                            }
+                            start()
+                        }
+                    }
+                }
+                "damn" -> {
+                    // glitch / fire distressed: translation + alpha flicker + tint shift
+                    ValueAnimator.ofFloat(0f, 1f).apply {
+                        duration = 180
+                        repeatCount = ValueAnimator.INFINITE
+                        repeatMode = ValueAnimator.REVERSE
+                        addUpdateListener {
+                            val r = (Math.random() * 4 - 2).toFloat()
+                            icon.translationX = r
+                            icon.translationY = (Math.random() * 2 - 1).toFloat()
+                            icon.alpha = 0.85f + Math.random().toFloat() * 0.15f
                         }
                         start()
                     }
-                }
-            }
-            "damn" -> {
-                // glitch / fire distressed: translation + alpha flicker + tint shift
-                ValueAnimator.ofFloat(0f, 1f).apply {
-                    duration = 180
-                    repeatCount = ValueAnimator.INFINITE
-                    repeatMode = ValueAnimator.REVERSE
-                    addUpdateListener {
-                        val r = (Math.random()*4 -2).toFloat()
-                        icon.translationX = r
-                        icon.translationY = (Math.random()*2 -1).toFloat()
-                        icon.alpha = 0.85f + Math.random().toFloat()*0.15f
+                    // fire glow behind card
+                    val fireBg = View(ctx).apply {
+                        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (2 * resources.displayMetrics.density).toInt())
+                        setBackgroundColor(Color.parseColor("#EF4444"))
+                        alpha = 0.18f
                     }
-                    start()
-                }
-                // fire glow behind card
-                val fireBg = View(ctx).apply {
-                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (2 * resources.displayMetrics.density).toInt())
-                    setBackgroundColor(Color.parseColor("#EF4444"))
-                    alpha = 0.18f
-                }
-                // add fire view behind icon? We'll add below icon via post
-                inner.addView(fireBg, 1) // after dotContainer, before icon? Actually icon already added, insert fire
-                // Animate fire alpha
-                ValueAnimator.ofFloat(0.12f, 0.28f, 0.12f).apply {
-                    duration = 500
-                    repeatCount = ValueAnimator.INFINITE
-                    addUpdateListener { v -> fireBg.alpha = v.animatedValue as Float }
-                    start()
-                }
-                // Add glitch container background pulse for card stroke
-                ValueAnimator.ofArgb(Color.parseColor("#A78BFA"), Color.parseColor("#EF4444"), Color.parseColor("#A78BFA")).apply {
-                    duration = 700
-                    repeatCount = ValueAnimator.INFINITE
-                    addUpdateListener { v -> card.strokeColor = v.animatedValue as Int }
-                    start()
+                    // add fire view behind icon? We'll add below icon via post
+                    inner.addView(fireBg, 1) // after dotContainer, before icon? Actually icon already added, insert fire
+                    // Animate fire alpha
+                    ValueAnimator.ofFloat(0.12f, 0.28f, 0.12f).apply {
+                        duration = 500
+                        repeatCount = ValueAnimator.INFINITE
+                        addUpdateListener { v -> fireBg.alpha = v.animatedValue as Float }
+                        start()
+                    }
+                    // Add glitch container background pulse for card stroke
+                    ValueAnimator.ofArgb(Color.parseColor("#A78BFA"), Color.parseColor("#EF4444"), Color.parseColor("#A78BFA")).apply {
+                        duration = 700
+                        repeatCount = ValueAnimator.INFINITE
+                        addUpdateListener { v -> card.strokeColor = v.animatedValue as Int }
+                        start()
+                    }
                 }
             }
         }
@@ -497,7 +502,7 @@ class DashboardFragment : Fragment() {
         return card
     }
 
-    private fun createAnimatedConnector(color: String): View {
+    private fun createAnimatedConnector(color: String, isRunning: Boolean = true): View {
         val ctx = context ?: return View(requireContext())
         val col = when (color) {
             "purple" -> Color.parseColor("#A78BFA")
@@ -511,10 +516,11 @@ class DashboardFragment : Fragment() {
                 marginEnd = (-3 * resources.displayMetrics.density).toInt()
             }
             setColor(col)
+            setAnimating(isRunning)
         }
     }
     // keep old name for compatibility
-    private fun createConnector(color: String): View = createAnimatedConnector(color)
+    private fun createConnector(color: String, isRunning: Boolean = true): View = createAnimatedConnector(color, isRunning)
 
     private fun updatePingChart(hist: Map<String, List<Int>>) {
         if (_binding == null || !isAdded) return
