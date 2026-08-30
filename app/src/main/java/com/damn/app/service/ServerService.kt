@@ -265,31 +265,11 @@ class ServerService : Service() {
                 val v6 = FileUtils.getGlobalIpv6()
                 if (v6 != null) { externalIpV6 = v6; log("Public IPv6: $v6") }
 
-                if (nat) {
-                    log("NAT: discovering UPnP IGD...")
-                    val result = NatPortMapper.mapPort(port, "DAMN:$label")
-                    result.onSuccess { gw ->
-                        val upnpIp = NatPortMapper.getExternalIp(gw)
-                        if (upnpIp != null && externalIp == null) externalIp = upnpIp
-                        log("NAT: forwarded $localIp:$port -> ${externalIp ?: "?"}:$port")
-                        updateNotification()
-                    }.onFailure { e -> log("NAT failed: ${e.message}") }
-                }
-
-                if (Prefs.isTorEnabled(this@ServerService)) {
-                    log("Tor: Starting internal instance...")
-                    torManager?.start({
-                        System.setProperty("socksProxyHost", "127.0.0.1")
-                        System.setProperty("socksProxyPort", "9050")
-                        torManager?.addHiddenService(port, Prefs.getOnionPort(this@ServerService), { url ->
-                            log("Tor ready: $url")
-                            Prefs.setOnionAddress(this@ServerService, url)
-                            updateNotification()
-                        }, { err -> log("Tor Error: $err") })
-                    }, { err -> log("Tor Error: $err") }, { p -> log("Tor: $p") })
-                }
-                if (Prefs.isNgrokEnabled(this@ServerService)) startNgrokTunnel(port)
-                if (Prefs.isCloudflaredEnabled(this@ServerService)) startCloudflaredTunnel(port)
+                if (nat) toggleNat(true)
+                if (Prefs.isTorEnabled(this@ServerService)) toggleTor(true)
+                if (Prefs.isNgrokEnabled(this@ServerService)) toggleNgrok(true)
+                if (Prefs.isCloudflaredEnabled(this@ServerService)) toggleCloudflare(true)
+                
                 updateNotification()
             }
         }
@@ -306,14 +286,65 @@ class ServerService : Service() {
         false
     }
 
-    private fun stopTorHiddenService() {
-        if (Prefs.isTorEnabled(this)) {
-            torManager?.stop()
-            Prefs.setOnionAddress(this, "")
-            System.clearProperty("socksProxyHost")
-            System.clearProperty("socksProxyPort")
-            log("Tor: Internal instance stopped")
+    fun toggleNat(enable: Boolean) {
+        natEnabled = enable
+        if (!isRunning()) return
+        scope.launch {
+            if (enable) {
+                log("NAT: discovering UPnP IGD...")
+                val label = Prefs.getHostLabel(this@ServerService).ifEmpty { "host" }
+                val result = NatPortMapper.mapPort(currentPort, "DAMN:$label")
+                result.onSuccess { gw ->
+                    val upnpIp = NatPortMapper.getExternalIp(gw)
+                    if (upnpIp != null && externalIp == null) externalIp = upnpIp
+                    log("NAT: forwarded ${FileUtils.getLocalIp(this@ServerService)}:$currentPort -> ${externalIp ?: "?"}:$currentPort")
+                    updateNotification()
+                }.onFailure { e -> log("NAT failed: ${e.message}") }
+            } else {
+                try { NatPortMapper.unmapPort(); log("NAT mapping removed") } catch (_: Exception) {}
+                updateNotification()
+            }
         }
+    }
+
+    fun toggleTor(enable: Boolean) {
+        if (!isRunning()) return
+        if (enable) startTorHiddenService() else stopTorHiddenService()
+    }
+
+    fun toggleNgrok(enable: Boolean) {
+        if (!isRunning()) return
+        if (enable) startNgrokTunnel(currentPort) else stopNgrokTunnel()
+    }
+
+    fun toggleCloudflare(enable: Boolean) {
+        if (!isRunning()) return
+        if (enable) startCloudflaredTunnel(currentPort) else stopCloudflaredTunnel()
+    }
+
+    private fun startTorHiddenService() {
+        if (!isRunning()) return
+        log("Tor: Starting internal instance...")
+        scope.launch {
+            torManager?.start({
+                System.setProperty("socksProxyHost", "127.0.0.1")
+                System.setProperty("socksProxyPort", "9050")
+                torManager?.addHiddenService(currentPort, Prefs.getOnionPort(this@ServerService), { url ->
+                    log("Tor ready: $url")
+                    Prefs.setOnionAddress(this@ServerService, url)
+                    updateNotification()
+                }, { err -> log("Tor Error: $err") })
+            }, { err -> log("Tor Error: $err") }, { p -> log("Tor: $p") })
+        }
+    }
+
+    private fun stopTorHiddenService() {
+        torManager?.stop()
+        Prefs.setOnionAddress(this, "")
+        System.clearProperty("socksProxyHost")
+        System.clearProperty("socksProxyPort")
+        log("Tor: Internal instance stopped")
+        updateNotification()
     }
 
     private fun startNgrokTunnel(port: Int) {

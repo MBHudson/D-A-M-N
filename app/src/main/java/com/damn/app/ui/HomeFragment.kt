@@ -87,16 +87,24 @@ class HomeFragment : Fragment() {
         binding.pickFolderBtn.setOnClickListener { pickFolderLauncher.launch(null) }
 
         binding.natSwitch.setOnCheckedChangeListener { _, v ->
-            Prefs.setNatEnabled(requireContext(), v); appendLog("NAT ${if (v) "enabled" else "disabled"}")
+            Prefs.setNatEnabled(requireContext(), v)
+            appendLog("NAT ${if (v) "enabled" else "disabled"}")
+            if (boundService?.isRunning() == true) boundService?.toggleNat(v)
         }
         binding.torSwitch.setOnCheckedChangeListener { _, v ->
-            Prefs.setTorEnabled(requireContext(), v); appendLog("Tor ${if (v) "enabled" else "disabled"}")
+            Prefs.setTorEnabled(requireContext(), v)
+            appendLog("Tor ${if (v) "enabled" else "disabled"}")
+            if (boundService?.isRunning() == true) boundService?.toggleTor(v)
         }
         binding.ngrokSwitch.setOnCheckedChangeListener { _, v ->
-            Prefs.setNgrokEnabled(requireContext(), v); appendLog("Ngrok ${if (v) "enabled" else "disabled"}")
+            Prefs.setNgrokEnabled(requireContext(), v)
+            appendLog("Ngrok ${if (v) "enabled" else "disabled"}")
+            if (boundService?.isRunning() == true) boundService?.toggleNgrok(v)
         }
         binding.cloudflaredSwitch.setOnCheckedChangeListener { _, v ->
-            Prefs.setCloudflaredEnabled(requireContext(), v); appendLog("Cloudflare ${if (v) "enabled" else "disabled"}")
+            Prefs.setCloudflaredEnabled(requireContext(), v)
+            appendLog("Cloudflare ${if (v) "enabled" else "disabled"}")
+            if (boundService?.isRunning() == true) boundService?.toggleCloudflare(v)
         }
 
         binding.toggleBtn.setOnClickListener { checkAndToggle() }
