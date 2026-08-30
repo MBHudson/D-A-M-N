@@ -137,9 +137,9 @@ class DashboardFragment : Fragment() {
         bottomRow.removeAllViews()
         if (nodes.isEmpty()) return
 
-        val port = try { Prefs.getPort(ctx) } catch (_:Exception){ 8080 }
-        val hostLabel = try { Prefs.getHostLabel(ctx).ifEmpty { "www" } } catch (_:Exception){"www"}
-        val customDns = try { Prefs.getCustomDns(ctx).takeIf { it.isNotBlank() } ?: "127.0.0.1 • dns" } catch (_:Exception){"127.0.0.1 • dns"}
+        val port = try { Prefs.getPort(ctx) } catch (_: Exception) { 8080 }
+        val hostLabel = try { Prefs.getHostLabel(ctx).ifEmpty { "www" } } catch (_: Exception) { "www" }
+        val customDns = try { Prefs.getCustomDns(ctx).takeIf { it.isNotBlank() } ?: "127.0.0.1 • dns" } catch (_: Exception) { "127.0.0.1 • dns" }
         val youIp = DashboardMetrics.ips.value.first
         val worldIp = DashboardMetrics.ips.value.second
         val isRunning = ServerService.instance?.isRunning() == true
@@ -147,47 +147,47 @@ class DashboardFragment : Fragment() {
         // Prepare purple overrides for firewall & NAT
         val fwRaw = nodes["firewall"] ?: return
         val natRaw = nodes["nat"] ?: return
-        // Force purple and Active for NAT, purple for firewall as requested
         val fwNode = fwRaw.copy(color = "purple", status = "online", ip = "FIREWALL", enabled = true)
         val natNode = natRaw.copy(color = "purple", status = "Active", ping = if (natRaw.ping > 0) natRaw.ping else 42, enabled = true, ip = natRaw.ip)
 
-        val hostN = nodes["host"] ?: return
-        val engN = nodes["engine"] ?: return
-        val dnsN = nodes["dns"] ?: return
+        if (!isRunning) {
+            // --- STANDBY VIEW: internet -> firewall -> nat -> you ---
+            // Top: Internet
+            topRow.addView(createEndpoint(false, worldIp))
 
-        // Top row: YOU → HOST FILES (phone) → PHP ENGINE → DNS (router)
-        topRow.addView(createEndpoint(true, youIp))
-        topRow.addView(createAnimatedConnector("live", isRunning))
-        topRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = isRunning))
-        topRow.addView(createAnimatedConnector(hostN.color, isRunning))
-        topRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = isRunning))
-        topRow.addView(createAnimatedConnector(engN.color, isRunning))
-        // DNS with router icon
-        val dnsPurple = dnsN.copy() // keep original color but icon router
-        topRow.addView(createNode("DNS / Loopback", customDns, dnsPurple, isFirewall = false, iconType = "router", hidePing = false, isRunning = isRunning))
+            // Middle: Firewall
+            midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = false))
 
-        // Middle: firewall with DAMN icon + glitch animation, label FIREWALL already via sub
-        midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = isRunning))
+            // Bottom: NAT -> YOU
+            bottomRow.addView(createNode("NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = false))
+            bottomRow.addView(createAnimatedConnector("live", false))
+            bottomRow.addView(createEndpoint(true, youIp))
+        } else {
+            // --- ACTIVE VIEW: Full Inbound Stack ---
+            val hostN = nodes["host"] ?: return
+            val engN = nodes["engine"] ?: return
+            val dnsN = nodes["dns"] ?: return
 
-        // Bottom: NAT (purple, no ping, router icon), then others
-        val order = listOf(
-            "nat" to Pair("NAT / UPNP", natNode),
-            "tor" to Pair("Tor Onion", nodes["tor"]!!),
-            "ngrok" to Pair("Ngrok", nodes["ngrok"]!!),
-            "cf" to Pair("Cloudflare", nodes["cf"]!!)
-        )
-        var first = true
-        order.forEach { (k, pair) ->
-            val (label, n) = pair
-            if (!first) bottomRow.addView(createAnimatedConnector("live", isRunning))
-            first = false
-            val icon = if (k == "nat") "router" else "default"
-            // For NAT, hide ping will be handled inside createNode via hidePing flag
-            val hidePing = (k == "nat")
-            bottomRow.addView(createNode(label, n.ip, n, isFirewall = false, iconType = icon, hidePing = hidePing, isRunning = isRunning))
+            // Top: INTERNET -> TUNNELS
+            topRow.addView(createEndpoint(false, worldIp))
+            val tunnels = listOf("tor" to nodes["tor"], "ngrok" to nodes["ngrok"], "cf" to nodes["cf"]).filter { it.second?.enabled == true }
+            tunnels.forEach { (k, n) ->
+                topRow.addView(createAnimatedConnector("live", true))
+                topRow.addView(createNode(if (k == "tor") "Tor Onion" else k.uppercase(), n?.ip ?: "—", n!!, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+            }
+
+            // Middle: Firewall
+            midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = true))
+
+            // Bottom: NAT -> PHP ENGINE -> HOST -> YOU
+            bottomRow.addView(createNode("NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
+            bottomRow.addView(createAnimatedConnector("live", true))
+            bottomRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+            bottomRow.addView(createAnimatedConnector(hostN.color, true))
+            bottomRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
+            bottomRow.addView(createAnimatedConnector("live", true))
+            bottomRow.addView(createEndpoint(true, youIp))
         }
-        bottomRow.addView(createAnimatedConnector("live", isRunning))
-        bottomRow.addView(createEndpoint(false, worldIp))
 
         binding.sPathView.setAnimating(isRunning)
         binding.routingContainer.post { updateSPath() }
