@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.fragment.app.Fragment
 import com.damn.app.R
 import com.damn.app.databinding.FragmentSettingsBinding
@@ -68,7 +68,7 @@ class SettingsFragment : Fragment() {
         binding.headerCloudflare.setOnClickListener { toggle(binding.contentCloudflare, binding.chevronCloudflare) }
         binding.headerAdvanced.setOnClickListener {
             if (binding.contentAdvanced.visibility == View.GONE) {
-                AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+                MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Proceed?")
                     .setMessage(R.string.experimental_warning)
                     .setPositiveButton("Yes") { _, _ -> toggle(binding.contentAdvanced, binding.chevronAdvanced) }
@@ -87,7 +87,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun confirmReset() {
-        AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("Reset Settings")
             .setMessage("This will reset all settings, ports and auth tokens, are you sure?")
             .setPositiveButton("Reset") { _, _ ->
@@ -105,7 +105,7 @@ class SettingsFragment : Fragment() {
             pInfo.versionName
         } catch (_: Exception) { "1.0.0" }
 
-        AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("D·A·M·N")
             .setMessage("Drop Any Media Now\nVersion $version\n\nAnonymous file sharing via Tor, Ngrok, and Cloudflare.")
             .setPositiveButton("OK", null)
