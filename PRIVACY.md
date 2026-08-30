@@ -1,4 +1,4 @@
-# Privacy Policy for D·A·M·N
+2# Privacy Policy for D·A·M·N
 
 **Last Updated: August 30, 2026**
 
@@ -19,9 +19,9 @@ The app requests several permissions to function as a server:
 
 ## 3. Third-Party Services
 When you enable specific sharing features, the following third-party services are involved. Their respective privacy policies apply:
-*   **Tor (Guardian Project)**: Used to provide an anonymous `.onion` address.
-*   **Ngrok**: Used to create a secure tunnel for public access.
-*   **Cloudflare (Cloudflared)**: Used to create a tunnel via the Cloudflare network.
+*   **Tor (Guardian Project)**: Used to provide an anonymous `.onion` address. [Tor Privacy Policy](https://www.torproject.org/about/privacy/)
+*   **Ngrok**: Used to create a secure tunnel for public access. [Ngrok Privacy Policy](https://ngrok.com/privacy)
+*   **Cloudflare (Cloudflared)**: Used to create a tunnel via the Cloudflare network. [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
 
 We do not control these services and recommend reviewing their privacy documentation if you use them.
 
