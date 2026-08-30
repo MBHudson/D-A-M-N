@@ -150,8 +150,9 @@
                         android:id="@+id/logText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="#94A3B8"
-                        android:textSize="10sp"
+                        android:textColor="#F8FAFC"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="2dp"
                         android:fontFamily="monospace"
                         android:textIsSelectable="true"
                         android:text="DAMN ready.\n" />

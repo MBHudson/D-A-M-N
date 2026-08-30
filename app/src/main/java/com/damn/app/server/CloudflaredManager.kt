@@ -109,12 +109,15 @@ class CloudflaredManager(private val context: Context) {
                         bin = candidate
                         started = true
                         Log.i(TAG, "Started with ${candidate.absolutePath}")
+                        onProgress?.invoke("Process started (PID: unknown)")
                         break
                     } catch (e: Exception) {
                         Log.w(TAG, "candidate ${candidate.absolutePath} failed: ${e.message}")
+                        onProgress?.invoke("Failed: ${candidate.name} - ${e.message}")
                         lastStartErr = e
                         val msg = e.message ?: ""
-                        if (msg.contains("Permission denied") || msg.contains("error=13")) continue else throw e
+                        // Continue trying other candidates on typical permission or format errors
+                        continue
                     }
                 }
                 if (!started || process == null) throw lastStartErr ?: Exception("all cloudflared candidates failed")

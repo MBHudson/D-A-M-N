@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -95,11 +96,13 @@ class ServerService : Service() {
     private var torManager: TorManager? = null
     private var ngrokManager: NgrokManager? = null
     private var cloudflaredManager: CloudflaredManager? = null
+    private var isServiceActive = false
+    private var multicastLock: WifiManager.MulticastLock? = null
 
     fun setLogListener(l: (String) -> Unit) { logListener = l; logs.forEach { l(it) } }
     fun clearLogListener() { logListener = null }
     fun getLogs(): List<String> = logs.toList()
-    fun isRunning(): Boolean = server?.isRunning == true || forwarder?.isRunning == true
+    fun isRunning(): Boolean = isServiceActive
     fun getPort(): Int = currentPort
     fun getVfs(): DamnVfs? = vfs
     fun getExternalIp(): String? = externalIp
@@ -165,6 +168,7 @@ class ServerService : Service() {
             return
         }
         stopServerInternal()
+        isServiceActive = true
 
         val uri = Prefs.getHostUri(this)
         if (uri == null && Prefs.isPhpEnabled(this)) {
@@ -284,6 +288,14 @@ class ServerService : Service() {
         if (!isRunning()) return
         scope.launch {
             if (enable) {
+                // Acquire MulticastLock for SSDP discovery
+                if (multicastLock == null) {
+                    val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                    multicastLock = wm.createMulticastLock("DAMN-NAT-Discovery")
+                    multicastLock?.setReferenceCounted(false)
+                }
+                multicastLock?.acquire()
+                
                 log("NAT: discovering UPnP IGD...")
                 val label = Prefs.getHostLabel(this@ServerService).ifEmpty { "host" }
                 val result = NatPortMapper.mapPort(currentPort, "DAMN:$label")
@@ -293,6 +305,9 @@ class ServerService : Service() {
                     log("NAT: forwarded ${FileUtils.getLocalIp(this@ServerService)}:$currentPort -> ${externalIp ?: "?"}:$currentPort")
                     updateNotification()
                 }.onFailure { e -> log("NAT failed: ${e.message}") }
+                
+                // Release after discovery to save power, SSDP is usually quick
+                multicastLock?.release()
             } else {
                 try { NatPortMapper.unmapPort(); log("NAT mapping removed") } catch (_: Exception) {}
                 updateNotification()
@@ -367,6 +382,8 @@ class ServerService : Service() {
 
     private fun stopServerInternal() {
         try { NatPortMapper.unmapPort(); log("NAT mapping removed") } catch (_: Exception) {}
+        try { multicastLock?.release() } catch (_: Exception) {}
+        multicastLock = null
         stopTorHiddenService()
         stopNgrokTunnel()
         stopCloudflaredTunnel()
@@ -374,6 +391,7 @@ class ServerService : Service() {
         externalIpV6 = null
         server?.stop(); server = null
         forwarder?.stop(); forwarder = null
+        isServiceActive = false
         Prefs.setWasRunning(this, false)
         try { DashboardMetrics.stop() } catch (_: Exception) {}
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Exception) {}
