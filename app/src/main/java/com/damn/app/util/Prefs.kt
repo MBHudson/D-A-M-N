@@ -29,6 +29,7 @@ object Prefs {
     private const val KEY_ONION_PRIVATE_KEY = "onion_private_key"
     private const val KEY_FORCE_PORTRAIT = "force_portrait"
     private const val KEY_CUSTOM_DNS = "custom_dns"
+    private const val KEY_SOUND_ALERTS = "sound_alerts"
 
     const val THEME_SYSTEM = 0
     const val THEME_LIGHT = 1
@@ -125,6 +126,9 @@ object Prefs {
 
     fun getCustomDns(ctx: Context): String = prefs(ctx).getString(KEY_CUSTOM_DNS, "") ?: ""
     fun setCustomDns(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_CUSTOM_DNS, v.trim()).apply() }
+
+    fun isSoundAlertsEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_SOUND_ALERTS, false)
+    fun setSoundAlertsEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_SOUND_ALERTS, v).apply() }
 
     fun applyTheme(ctx: Context) {
         val theme = getTheme(ctx)

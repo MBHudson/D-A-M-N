@@ -3,7 +3,10 @@ package com.damn.app.ui
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -32,6 +35,8 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
     private var isFullscreen = false
+    private var toneGen: ToneGenerator? = null
+    private var beepJob: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
@@ -47,6 +52,7 @@ class DashboardFragment : Fragment() {
         }
         observeMetrics()
         restoreSpeedMetrics()
+        startBeepMonitor()
         // auto-run speed test once on first entry after service connected correctly
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -359,8 +365,8 @@ class DashboardFragment : Fragment() {
 
         val ip = TextView(ctx).apply {
             text = sub; setTextColor(Color.parseColor("#E6ECF5")); textSize = if (isFw) 6.4f else 7.2f; gravity = Gravity.CENTER; isSingleLine = true
-            typeface = android.graphics.Typeface.MONOSPACE
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            typeface = Typeface.MONOSPACE
+            setTypeface(typeface, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
         inner.addView(ip)
@@ -371,7 +377,7 @@ class DashboardFragment : Fragment() {
             textSize = if (isFw) 5.6f else 6.3f
             gravity = Gravity.CENTER
             letterSpacing = 0.05f
-            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTypeface(null, Typeface.BOLD)
             setPadding((6 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt(), (6 * resources.displayMetrics.density).toInt(), (2 * resources.displayMetrics.density).toInt())
             val bg = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -417,7 +423,7 @@ class DashboardFragment : Fragment() {
             pingCol.addView(TextView(ctx).apply { text = "Ping"; setTextColor(Color.parseColor("#64748B")); textSize = if (isFw) 5f else 5.4f; gravity = Gravity.CENTER })
             pingCol.addView(TextView(ctx).apply {
                 text = if (info.ping > 0) "${info.ping}ms" else "—"
-                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, android.graphics.Typeface.BOLD)
+                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
                 setTextColor(when (info.color) {
                     "purple" -> Color.parseColor("#A78BFA")
                     "green" -> Color.parseColor("#22C55E")
@@ -434,13 +440,13 @@ class DashboardFragment : Fragment() {
             extraCol.addView(TextView(ctx).apply { text = if (isFirewall) "Wall" else "Bypass"; setTextColor(Color.parseColor("#64748B")); textSize = if (isFw) 5f else 5.4f; gravity = Gravity.CENTER })
             extraCol.addView(TextView(ctx).apply {
                 text = if (isFirewall) "ON" else (if (info.enabled) "active" else "off")
-                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, android.graphics.Typeface.BOLD); setTextColor(Color.parseColor("#E6ECF5"))
+                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD); setTextColor(Color.parseColor("#E6ECF5"))
             })
             statsRow.addView(extraCol)
         } else {
             // NAT hidden ping: show only Bypass centered
             val centered = TextView(ctx).apply {
-                text = "Active"; setTextColor(Color.parseColor("#A78BFA")); textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, android.graphics.Typeface.BOLD)
+                text = "Active"; setTextColor(Color.parseColor("#A78BFA")); textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
                 letterSpacing = 0.06f
             }
             statsRow.addView(centered)
@@ -472,11 +478,11 @@ class DashboardFragment : Fragment() {
         inner.addView(TextView(ctx).apply {
             text = if (isYou) "YOU" else "INTERNET"
             setTextColor(if (isYou) Color.parseColor("#94A3B8") else Color.parseColor("#38BDF8"))
-            textSize = 7.2f; gravity = Gravity.CENTER; setTypeface(null, android.graphics.Typeface.BOLD); letterSpacing = 0.06f
+            textSize = 7.2f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD); letterSpacing = 0.06f
         })
         inner.addView(TextView(ctx).apply {
             text = ip; setTextColor(Color.parseColor("#64748B")); textSize = 6.3f; gravity = Gravity.CENTER; isSingleLine = true
-            typeface = android.graphics.Typeface.MONOSPACE; maxLines = 1
+            typeface = Typeface.MONOSPACE; maxLines = 1
         })
         if (!isYou) {
             val btn = TextView(ctx).apply {
@@ -614,5 +620,38 @@ class DashboardFragment : Fragment() {
             binding.speedBtn.isEnabled = true
             binding.speedBtn.text = "Run Speed Test"
         }
+    }
+
+    private fun startBeepMonitor() {
+        if (toneGen == null) {
+            try {
+                toneGen = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 85)
+            } catch (_: Exception) {}
+        }
+        beepJob?.cancel()
+        beepJob = viewLifecycleOwner.lifecycleScope.launch {
+            while (isActive) {
+                val nodes = DashboardMetrics.nodes.value
+                val soundEnabled = try { Prefs.isSoundAlertsEnabled(requireContext()) } catch(_:Exception){ false }
+                val isServerRunning = ServerService.instance?.isRunning() == true
+
+                if (soundEnabled && isServerRunning && nodes.isNotEmpty()) {
+                    // Check for any enabled node that is offline
+                    val hasOffline = nodes.values.any { it.enabled && it.status == "offline" }
+                    if (hasOffline) {
+                        toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
+                    }
+                }
+                delay(2000) // Beep every 2 seconds if any node is unreachable
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        beepJob?.cancel()
+        toneGen?.release()
+        toneGen = null
+        _binding = null
     }
 }

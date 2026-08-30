@@ -77,6 +77,7 @@ class SettingsFragment : Fragment() {
         binding.passwordInput.setText(Prefs.getPassword(ctx))
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(ctx)
         binding.portraitSwitch.isChecked = Prefs.isForcePortrait(ctx)
+        binding.soundSwitch.isChecked = Prefs.isSoundAlertsEnabled(ctx)
         binding.dnsInput.setText(Prefs.getCustomDns(ctx))
 
         binding.torLocalPortInput.setText(Prefs.getPort(ctx).toString())
@@ -127,6 +128,7 @@ class SettingsFragment : Fragment() {
         Prefs.setPassword(ctx, binding.passwordInput.text.toString())
         Prefs.setShutdownOnDisconnect(ctx, binding.shutdownSwitch.isChecked)
         Prefs.setForcePortrait(ctx, binding.portraitSwitch.isChecked)
+        Prefs.setSoundAlertsEnabled(ctx, binding.soundSwitch.isChecked)
         Prefs.setCustomDns(ctx, binding.dnsInput.text.toString())
 
         // Determine which section expanded last? Just use visible port inputs — prioritize active? For simplicity, if any of Tor/Ngrok/CF sections visible and edited, sync port accordingly. But we keep simple: check expanded states or just use general port unchanged.
