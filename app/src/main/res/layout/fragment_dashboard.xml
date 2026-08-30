@@ -79,66 +79,70 @@
             app:strokeColor="#1E293B"
             app:strokeWidth="1dp">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/routingContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginTop="10dp"
+                android:background="#0B1220"
+                android:padding="8dp">
 
-                <FrameLayout
-                    android:id="@+id/routingContainer"
+                <com.damn.app.ui.SPathView
+                    android:id="@+id/sPathView"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@id/rowsContainer"
+                    app:layout_constraintEnd_toEndOf="@id/rowsContainer"
+                    app:layout_constraintStart_toStartOf="@id/rowsContainer"
+                    app:layout_constraintTop_toTopOf="@id/rowsContainer" />
+
+                <LinearLayout
+                    android:id="@+id/rowsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="#0B1220"
-                    android:padding="8dp">
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                    <com.damn.app.ui.SPathView
-                        android:id="@+id/sPathView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <LinearLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:scrollbars="none"
-                            android:overScrollMode="never">
-                            <LinearLayout
-                                android:id="@+id/topRow"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical" />
-                        </HorizontalScrollView>
+                        android:overScrollMode="never"
+                        android:scrollbars="none">
 
                         <LinearLayout
-                            android:id="@+id/midRow"
-                            android:layout_width="match_parent"
+                            android:id="@+id/topRow"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:paddingVertical="6dp" />
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
 
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
+                    <LinearLayout
+                        android:id="@+id/midRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingVertical="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:overScrollMode="never"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:id="@+id/bottomRow"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:scrollbars="none"
-                            android:overScrollMode="never">
-                            <LinearLayout
-                                android:id="@+id/bottomRow"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical" />
-                        </HorizontalScrollView>
-                    </LinearLayout>
-                </FrameLayout>
-            </LinearLayout>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Traffic card — combined Traffic + Ping History (single graph) -->

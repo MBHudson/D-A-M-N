@@ -59,6 +59,8 @@ object Prefs {
     fun isHostFile(ctx: Context): Boolean =
         prefs(ctx).getBoolean(KEY_IS_FILE, false)
 
+    fun isHostSingleFile(ctx: Context): Boolean = isHostFile(ctx)
+
     fun getPort(ctx: Context): Int = prefs(ctx).getInt(KEY_PORT, 8080)
     fun setPort(ctx: Context, port: Int) { prefs(ctx).edit().putInt(KEY_PORT, port).apply() }
 

@@ -24,6 +24,9 @@ import com.damn.app.server.PhpFileServer
 import com.damn.app.server.SimplePhpEngine
 import com.damn.app.server.TorManager
 import com.damn.app.ui.DashboardMetrics
+import com.damn.app.util.DamnVfs
+import com.damn.app.util.DocumentVfs
+import com.damn.app.util.FileVfs
 import com.damn.app.util.FileUtils
 import com.damn.app.util.NativeUtils
 import com.damn.app.util.Prefs
@@ -82,7 +85,7 @@ class ServerService : Service() {
     private var server: PhpFileServer? = null
     private var currentPort: Int = 8080
     private var natEnabled: Boolean = true
-    private var docRoot: File? = null
+    private var vfs: DamnVfs? = null
     private var externalIp: String? = null
     private var externalIpV6: String? = null
     private var lastActivityTime: Long = System.currentTimeMillis()
@@ -97,7 +100,7 @@ class ServerService : Service() {
     fun getLogs(): List<String> = logs.toList()
     fun isRunning(): Boolean = server?.isRunning == true
     fun getPort(): Int = currentPort
-    fun getDocRoot(): File? = docRoot
+    fun getVfs(): DamnVfs? = vfs
     fun getExternalIp(): String? = externalIp
     fun getExternalIpV6(): String? = externalIpV6
 
@@ -188,23 +191,27 @@ class ServerService : Service() {
         }
 
         scope.launch {
-            log("preparing $label ...")
-            val root = try {
-                FileUtils.copyUriToCache(this@ServerService, uri, label)
+            log("preparing virtual file system for $label ...")
+            val currentVfs: DamnVfs = try {
+                if (Prefs.isHostSingleFile(this@ServerService)) {
+                    // For single files, we still copy to cache for simplicity and performance
+                    val root = FileUtils.copyUriToCache(this@ServerService, uri, label)
+                    FileVfs(root)
+                } else {
+                    // For folders, use DocumentVfs to avoid 10GB copies
+                    DocumentVfs(this@ServerService, uri)
+                }
             } catch (e: Exception) {
-                log("copy failed: ${e.message}")
+                log("VFS init failed: ${e.message}")
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 return@launch
             }
-            docRoot = root
-            log("docRoot: ${root.absolutePath} (${root.listFiles()?.size ?: 0} items)")
+            vfs = currentVfs
+            log("VFS ready: ${currentVfs.getRootName()}")
 
             val localIp = FileUtils.getLocalIp(this@ServerService)
 
             // Start HTTP server
-            // Prefer the static PHP binary packaged as a native lib (extracted by the
-            // system to nativeLibraryDir, where exec is permitted on Android 10+).
-            // Writable-storage binaries (filesDir) cannot be executed on API 29+.
             val phpBin = listOf(
                 File(applicationInfo.nativeLibraryDir, "libphp.so").absolutePath,
                 NativeUtils.getBinaryPath(this@ServerService, "php")
@@ -219,7 +226,7 @@ class ServerService : Service() {
             }
 
             val pass = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getPassword(this@ServerService) else null
-            val srv = PhpFileServer(root, port, engine, pass, {
+            val srv = PhpFileServer(currentVfs, port, engine, pass, cacheDir, {
                 lastActivityTime = System.currentTimeMillis()
             }) { msg -> log(msg) }
             try {
@@ -232,7 +239,6 @@ class ServerService : Service() {
             server = srv
             Prefs.setWasRunning(this@ServerService, true)
             lastActivityTime = System.currentTimeMillis()
-            // start dashboard metrics when server starts — keeps running even if user leaves dashboard screen
             try { DashboardMetrics.start(this@ServerService) } catch (_: Exception) {}
 
             // Shutdown watchdog
@@ -241,8 +247,8 @@ class ServerService : Service() {
                     delay(10000)
                     if (Prefs.isShutdownOnDisconnect(this@ServerService)) {
                         val idle = System.currentTimeMillis() - lastActivityTime
-                        if (idle > 60000) { // 1 minute timeout
-                            log("Shutting down due to inactivity (Shutdown On Disconnect)")
+                        if (idle > 60000) {
+                            log("Shutting down due to inactivity")
                             stopSelf()
                             break
                         }
@@ -254,19 +260,10 @@ class ServerService : Service() {
 
             // NAT & IP Discovery
             scope.launch {
-                // 1. Try to get external IP via web service (more reliable for display)
                 val webIp = FileUtils.getExternalIpViaWeb()
-                if (webIp != null) {
-                    externalIp = webIp
-                    log("Public IP (Web): $webIp")
-                }
-
-                // 2. Try to get Global IPv6
+                if (webIp != null) { externalIp = webIp; log("Public IP (Web): $webIp") }
                 val v6 = FileUtils.getGlobalIpv6()
-                if (v6 != null) {
-                    externalIpV6 = v6
-                    log("Public IPv6: $v6")
-                }
+                if (v6 != null) { externalIpV6 = v6; log("Public IPv6: $v6") }
 
                 if (nat) {
                     log("NAT: discovering UPnP IGD...")
@@ -274,52 +271,25 @@ class ServerService : Service() {
                     result.onSuccess { gw ->
                         val upnpIp = NatPortMapper.getExternalIp(gw)
                         if (upnpIp != null && externalIp == null) externalIp = upnpIp
-                        val pub = externalIp?.let { "http://$it:$port" } ?: "mapped via ${gw.locationUrl}"
                         log("NAT: forwarded $localIp:$port -> ${externalIp ?: "?"}:$port")
-                        log("NAT: public URL $pub")
                         updateNotification()
-                    }.onFailure { e ->
-                        log("NAT failed: ${e.message}")
-                        log("NAT tip: enable UPnP on router or forward port $port manually. Mobile data NAT is usually blocked.")
-                    }
-                } else {
-                    log("NAT forwarding disabled")
+                    }.onFailure { e -> log("NAT failed: ${e.message}") }
                 }
 
-                // Tor Integration
                 if (Prefs.isTorEnabled(this@ServerService)) {
                     log("Tor: Starting internal instance...")
                     torManager?.start({
-                        log("Tor: Connected. Creating Hidden Service...")
-                        // Route app traffic through Tor now that it is up
                         System.setProperty("socksProxyHost", "127.0.0.1")
                         System.setProperty("socksProxyPort", "9050")
-                        val onionPort = Prefs.getOnionPort(this@ServerService)
-                        torManager?.addHiddenService(port, onionPort, { url ->
-                            log("Tor: Hidden Service ready: $url")
-                            log("Tor: open $url in Tor Browser — first visit can take 1-2 min (descriptor propagation)")
+                        torManager?.addHiddenService(port, Prefs.getOnionPort(this@ServerService), { url ->
+                            log("Tor ready: $url")
                             Prefs.setOnionAddress(this@ServerService, url)
                             updateNotification()
-                        }, { err ->
-                            log("Tor Error: $err")
-                        })
-                    }, { err ->
-                        log("Tor Error: $err")
-                    }, { progress ->
-                        log("Tor: $progress")
-                    })
+                        }, { err -> log("Tor Error: $err") })
+                    }, { err -> log("Tor Error: $err") }, { p -> log("Tor: $p") })
                 }
-
-                // Ngrok Integration
-                if (Prefs.isNgrokEnabled(this@ServerService)) {
-                    startNgrokTunnel(port)
-                }
-
-                // Cloudflare Tunnel Integration
-                if (Prefs.isCloudflaredEnabled(this@ServerService)) {
-                    startCloudflaredTunnel(port)
-                }
-
+                if (Prefs.isNgrokEnabled(this@ServerService)) startNgrokTunnel(port)
+                if (Prefs.isCloudflaredEnabled(this@ServerService)) startCloudflaredTunnel(port)
                 updateNotification()
             }
         }
@@ -404,7 +374,7 @@ class ServerService : Service() {
         try { DashboardMetrics.stop() } catch (_: Exception) {}
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Exception) {}
         // keep logs but note
-        if (docRoot != null) log("server stopped")
+        if (vfs != null) log("server stopped")
     }
 
     private fun updateNotification() {

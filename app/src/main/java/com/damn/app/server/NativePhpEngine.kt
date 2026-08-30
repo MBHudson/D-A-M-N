@@ -1,6 +1,7 @@
 package com.damn.app.server
 
 import android.util.Log
+import com.damn.app.util.DamnVfs
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -9,12 +10,13 @@ import java.util.concurrent.TimeUnit
  */
 class NativePhpEngine(private val binaryPath: String) : PhpEngine {
     
-    override fun render(file: File, docRoot: File): String {
+    override fun render(path: String, vfs: DamnVfs, cacheDir: File): String {
+        val tempFile = vfs.getAsFile(path, cacheDir) ?: return "<!-- DAMN Native engine error: could not resolve file -->"
         return try {
-            val pb = ProcessBuilder(binaryPath, file.absolutePath)
-                .directory(docRoot)
+            val pb = ProcessBuilder(binaryPath, tempFile.absolutePath)
+                .directory(cacheDir)
                 .redirectErrorStream(true)
-            pb.environment()["TMPDIR"] = System.getProperty("java.io.tmpdir") ?: "/data/local/tmp"
+            pb.environment()["TMPDIR"] = cacheDir.absolutePath
             val process = pb.start()
 
             val output = process.inputStream.bufferedReader().readText()
@@ -29,6 +31,8 @@ class NativePhpEngine(private val binaryPath: String) : PhpEngine {
         } catch (e: Exception) {
             Log.e("DAMN-NativePhp", "Failed to execute PHP", e)
             "<!-- DAMN Native engine error: ${e.message} -->"
+        } finally {
+            try { tempFile.delete() } catch (_: Exception) {}
         }
     }
 }
