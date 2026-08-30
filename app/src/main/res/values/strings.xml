@@ -41,4 +41,9 @@
     <string name="permission_needed">Notification permission needed for background service</string>
     <string name="sound_alerts">Sound Alerts</string>
     <string name="sound_alerts_desc">Beep every 2s when any node is unreachable</string>
+    <string name="about">About</string>
+    <string name="about_app">About D·A·M·N</string>
+    <string name="developer">Developer</string>
+    <string name="developer_name">MBHudson</string>
+    <string name="privacy_policy">Privacy Policy</string>
 </resources>

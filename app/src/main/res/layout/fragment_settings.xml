@@ -707,6 +707,149 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- About -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/damn_card"
+            app:strokeColor="#1E293B"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/headerAbout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <android.widget.ImageView
+                        android:id="@+id/chevronAbout"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="#94A3B8" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/contentAbout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingBottom="14dp"
+                    android:visibility="gone">
+
+                    <!-- About App -->
+                    <LinearLayout
+                        android:id="@+id/btnAboutApp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/about_app"
+                            android:textColor="@color/white"
+                            android:textSize="13sp" />
+                        <android.widget.ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_chevron_down"
+                            android:rotation="-90"
+                            app:tint="#64748B" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E293B" />
+
+                    <!-- Developer -->
+                    <LinearLayout
+                        android:id="@+id/btnDeveloper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/developer"
+                            android:textColor="@color/white"
+                            android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/developer_name"
+                            android:textColor="#38BDF8"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp" />
+                        <android.widget.ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_globe"
+                            app:tint="#64748B" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E293B" />
+
+                    <!-- Privacy Policy -->
+                    <LinearLayout
+                        android:id="@+id/btnPrivacyPolicy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/privacy_policy"
+                            android:textColor="@color/white"
+                            android:textSize="13sp" />
+                        <android.widget.ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_globe"
+                            app:tint="#64748B" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveBtn"
             android:layout_width="match_parent"

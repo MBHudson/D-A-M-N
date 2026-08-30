@@ -3,6 +3,7 @@ package com.damn.app.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.damn.app.R
 import com.damn.app.databinding.FragmentSettingsBinding
 import com.damn.app.util.Prefs
 import java.io.File
@@ -63,6 +66,32 @@ class SettingsFragment : Fragment() {
         binding.headerTor.setOnClickListener { toggle(binding.contentTor, binding.chevronTor) }
         binding.headerNgrok.setOnClickListener { toggle(binding.contentNgrok, binding.chevronNgrok) }
         binding.headerCloudflare.setOnClickListener { toggle(binding.contentCloudflare, binding.chevronCloudflare) }
+        binding.headerAbout.setOnClickListener { toggle(binding.contentAbout, binding.chevronAbout) }
+
+        binding.btnAboutApp.setOnClickListener { showAboutDialog() }
+        binding.btnDeveloper.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N") }
+        binding.btnPrivacyPolicy.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N/blob/main/PRIVACY.md") }
+    }
+
+    private fun showAboutDialog() {
+        val version = try {
+            val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            pInfo.versionName
+        } catch (_: Exception) { "1.0.0" }
+
+        AlertDialog.Builder(requireContext(), R.style.Theme_DAMN)
+            .setTitle("D·A·M·N")
+            .setMessage("Drop Any Media Now\nVersion $version\n\nAnonymous file sharing via Tor, Ngrok, and Cloudflare.")
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+            Toast.makeText(requireContext(), "Could not open link", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadPrefs() {
