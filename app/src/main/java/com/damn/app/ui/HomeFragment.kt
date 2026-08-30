@@ -236,9 +236,9 @@ class HomeFragment : Fragment() {
         val running = svc?.isRunning() == true
         val port = svc?.getPort() ?: Prefs.getPort(ctx)
 
-        // START = folders (other image), STOP = disconnect globe+X — both resized 18dp and themed, no tint to preserve DAMN colors
+        // START = play, STOP = stop — both resized 18dp and themed, no tint to preserve DAMN colors
         binding.toggleBtn.text = if (running) "STOP" else "START"
-        binding.toggleBtn.setIconResource(if (running) R.drawable.ic_stop_disconnect else R.drawable.ic_start_folders)
+        binding.toggleBtn.setIconResource(if (running) R.drawable.ic_stop else R.drawable.ic_play)
         binding.toggleBtn.iconTint = null
         binding.toggleBtn.backgroundTintList = ContextCompat.getColorStateList(ctx, if (running) android.R.color.holo_red_dark else R.color.damn_accent)
 

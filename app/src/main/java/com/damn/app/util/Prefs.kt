@@ -81,7 +81,7 @@ object Prefs {
     fun wasRunning(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_WAS_RUNNING, false)
     fun setWasRunning(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_WAS_RUNNING, v).apply() }
 
-    fun getTheme(ctx: Context): Int = prefs(ctx).getInt(KEY_THEME, THEME_SYSTEM)
+    fun getTheme(ctx: Context): Int = prefs(ctx).getInt(KEY_THEME, THEME_DARK)
     fun setTheme(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_THEME, v).apply() }
 
     fun hasHost(ctx: Context): Boolean = getHostUri(ctx) != null

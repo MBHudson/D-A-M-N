@@ -220,7 +220,7 @@
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     app:cornerRadius="10dp"
-                    app:icon="@drawable/ic_start_folders"
+                    app:icon="@drawable/ic_play"
                     app:iconGravity="top"
                     app:iconSize="18dp"
                     app:iconPadding="1dp"

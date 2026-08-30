@@ -125,7 +125,8 @@ class SettingsFragment : Fragment() {
         when (Prefs.getTheme(ctx)) {
             Prefs.THEME_LIGHT -> binding.themeLight.isChecked = true
             Prefs.THEME_DARK -> binding.themeDark.isChecked = true
-            else -> binding.themeSystem.isChecked = true
+            Prefs.THEME_SYSTEM -> binding.themeSystem.isChecked = true
+            else -> binding.themeDark.isChecked = true
         }
         binding.bootSwitch.isChecked = Prefs.isStartAtBoot(ctx)
         binding.passwordSwitch.isChecked = Prefs.isPasswordEnabled(ctx)
