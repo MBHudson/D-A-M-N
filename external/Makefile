@@ -84,6 +84,7 @@ REPRODUCIBLE_CFLAGS := \
 
 ALL_CFLAGS := $(REPRODUCIBLE_CFLAGS) $(CFLAGS) -Os
 export CFLAGS := $(ALL_CFLAGS)
+export LDFLAGS := -Wl,-z,max-page-size=16384
 
 
 OUTPUT_FILE := $(EXTERNAL_ROOT)/tor/src/app/tor
@@ -163,7 +164,7 @@ openssl-clean:
 libevent/Makefile: libevent/Makefile.am libevent/configure.ac
 	cd libevent && ./autogen.sh
 	cd libevent && ./configure \
-				LDFLAGS="-L../lib" \
+				LDFLAGS="$(LDFLAGS) -L../lib" \
 				CFLAGS="-I../include" \
 				--host=$(ALTHOST) \
 				--disable-libevent-regress \
@@ -247,6 +248,7 @@ tor/Makefile: tor/configure.ac tor/Makefile.am
 	@which pkg-config || (echo "ERROR: pkg-config is required! apt-get install pkg-config"; exit 1)
 	cd tor && ./autogen.sh
 	cd tor && \
+			LDFLAGS="$(LDFLAGS)" \
 			CPPFLAGS="$(CPPFLAGS) -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/$(NDK_UNAME)" ./configure \
 				--host=$(ALTHOST) \
 				--enable-android \

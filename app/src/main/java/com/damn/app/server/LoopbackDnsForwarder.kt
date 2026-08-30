@@ -3,6 +3,7 @@ package com.damn.app.server
 import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
+import com.damn.app.util.Prefs
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -55,10 +56,18 @@ class LoopbackDnsForwarder(private val context: Context) {
     }
 
     private fun upstreamServers(): List<InetAddress> {
-        val found = try {
+        val custom = Prefs.getCustomDns(context)
+        val found = mutableListOf<InetAddress>()
+        if (custom.isNotEmpty()) {
+            try {
+                InetAddress.getByName(custom).let { found.add(it) }
+            } catch (_: Exception) {}
+        }
+        try {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            cm.getLinkProperties(cm.activeNetwork)?.dnsServers?.filterNotNull() ?: emptyList()
-        } catch (_: Exception) { emptyList() }
+            cm.getLinkProperties(cm.activeNetwork)?.dnsServers?.filterNotNull()?.let { found.addAll(it) }
+        } catch (_: Exception) {}
+        
         return found.ifEmpty {
             listOf(
                 InetAddress.getByName("8.8.8.8"),

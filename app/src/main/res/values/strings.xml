@@ -32,6 +32,9 @@
     <string name="notif_channel_desc">Shows while DAMN file server is running</string>
     <string name="notif_title">DAMN Server running</string>
     <string name="notif_text">Serving %1$s on port %2$d</string>
+    <string name="notif_boot_ready_title">Server ready to start</string>
+    <string name="notif_boot_ready_text">Tap to start serving %1$s</string>
+    <string name="tap_to_start">Tap to Start</string>
     <string name="error_no_path">Please select a file or folder first</string>
     <string name="error_invalid_port">Port must be 1024–65535</string>
     <string name="error_port_in_use">Port already in use</string>

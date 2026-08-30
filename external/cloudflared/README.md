@@ -28,7 +28,7 @@ $env:GOOS="android"
 $env:GOARCH="arm64"
 $env:CGO_ENABLED="1"
 $env:CC="C:\Users\BinBash\AppData\Local\Android\Sdk\ndk\27.0.12077973\toolchains\llvm\prebuilt\windows-x86_64\bin\aarch64-linux-android26-clang.cmd"
-go build -ldflags="-s -w" -o libcloudflared.so ./cmd/cloudflared
+go build -ldflags="-s -w -extldflags=-Wl,-z,max-page-size=16384" -o libcloudflared.so ./cmd/cloudflared
 
 # 3. Place
 Copy-Item libcloudflared.so "C:\Users\BinBash\Documents\01DAMN\videochat\app\src\main\jniLibs\arm64-v8a\libcloudflared.so" -Force

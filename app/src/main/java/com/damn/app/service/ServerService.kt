@@ -23,6 +23,7 @@ import com.damn.app.server.PhpEngine
 import com.damn.app.server.PhpFileServer
 import com.damn.app.server.SimplePhpEngine
 import com.damn.app.server.TorManager
+import com.damn.app.ui.DashboardMetrics
 import com.damn.app.util.FileUtils
 import com.damn.app.util.NativeUtils
 import com.damn.app.util.Prefs
@@ -61,6 +62,17 @@ class ServerService : Service() {
 
         var instance: ServerService? = null
             private set
+
+        fun createChannel(ctx: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val ch = NotificationChannel(CHANNEL_ID, ctx.getString(R.string.notif_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
+                    description = ctx.getString(R.string.notif_channel_desc)
+                    setShowBadge(false)
+                }
+                nm.createNotificationChannel(ch)
+            }
+        }
     }
 
     private val binder = LocalBinder()
@@ -92,7 +104,7 @@ class ServerService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        createChannel()
+        createChannel(this)
         torManager = TorManager(this)
         ngrokManager = NgrokManager(this)
         cloudflaredManager = CloudflaredManager(this)
@@ -129,15 +141,6 @@ class ServerService : Service() {
         return START_STICKY
     }
 
-    private fun createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val ch = NotificationChannel(CHANNEL_ID, getString(R.string.notif_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
-                description = getString(R.string.notif_channel_desc)
-                setShowBadge(false)
-            }
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(ch)
-        }
-    }
 
     private fun buildNotification(text: String): Notification {
         val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -173,7 +176,16 @@ class ServerService : Service() {
 
         val label = Prefs.getHostLabel(this).ifEmpty { "host" }
         // Start notification first (foreground required)
-        startForeground(NOTIF_ID, buildNotification(getString(R.string.notif_text, label, port)))
+        try {
+            startForeground(NOTIF_ID, buildNotification(getString(R.string.notif_text, label, port)))
+        } catch (e: Exception) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is android.app.ForegroundServiceStartNotAllowedException) {
+                log("Foreground service start not allowed from background: ${e.message}")
+                stopSelf()
+                return
+            }
+            throw e
+        }
 
         scope.launch {
             log("preparing $label ...")
@@ -220,6 +232,8 @@ class ServerService : Service() {
             server = srv
             Prefs.setWasRunning(this@ServerService, true)
             lastActivityTime = System.currentTimeMillis()
+            // start dashboard metrics when server starts — keeps running even if user leaves dashboard screen
+            try { DashboardMetrics.start(this@ServerService) } catch (_: Exception) {}
 
             // Shutdown watchdog
             scope.launch {
@@ -334,7 +348,7 @@ class ServerService : Service() {
 
     private fun startNgrokTunnel(port: Int) {
         val token = Prefs.getNgrokToken(this)
-        if (token.isEmpty()) {
+        if (token.isBlank()) {
             log("Ngrok: No Auth Token provided in settings.")
             return
         }
@@ -387,6 +401,7 @@ class ServerService : Service() {
         externalIpV6 = null
         server?.stop(); server = null
         Prefs.setWasRunning(this, false)
+        try { DashboardMetrics.stop() } catch (_: Exception) {}
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Exception) {}
         // keep logs but note
         if (docRoot != null) log("server stopped")

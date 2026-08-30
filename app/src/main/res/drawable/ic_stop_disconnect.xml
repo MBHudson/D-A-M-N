@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <!-- Globe (recolored to DAMN accent light) -->
+    <path android:fillColor="#38BDF8" android:pathData="M18,22 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0z" android:strokeColor="#0B1220" android:strokeWidth="2"/>
+    <path android:fillColor="#0B1220" android:pathData="M18,36 L74,36 M18,50 L74,50 M38,22 C38,38 54,58 46,74 M54,22 C54,38 38,58 46,74 M46,22 L46,74" android:strokeColor="#0B1220" android:strokeWidth="3" android:strokeLineCap="round"/>
+    <path android:fillColor="#00000000" android:strokeColor="#0F172A" android:strokeWidth="4" android:pathData="M22,36 L70,36 M22,50 L70,50 M38,24 L38,66 M54,24 L54,66 M46,24 L46,66 M30,28 Q46,34 62,28 M30,58 Q46,52 62,58"/>
+    <!-- Monitor -->
+    <path android:fillColor="#1E293B" android:pathData="M62,28 L98,28 L98,62 L62,62 Z" android:strokeColor="#334155" android:strokeWidth="2"/>
+    <path android:fillColor="#38BDF8" android:pathData="M66,32 L94,32 L94,58 L66,58 Z"/>
+    <path android:fillColor="#475569" android:pathData="M76,62 L84,62 L86,70 L74,70 Z"/>
+    <path android:fillColor="#64748B" android:pathData="M72,72 L88,72 L88,76 L72,76 Z"/>
+    <!-- Red X (disconnect) -->
+    <path android:fillColor="#00000000" android:strokeColor="#EF4444" android:strokeWidth="7" android:strokeLineCap="round" android:pathData="M42,82 L62,98 M62,82 L42,98"/>
+</vector>

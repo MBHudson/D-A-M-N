@@ -27,6 +27,8 @@ object Prefs {
     private const val KEY_NGROK_ADDRESS = "ngrok_address"
     private const val KEY_CLOUDFLARED_ADDRESS = "cloudflared_address"
     private const val KEY_ONION_PRIVATE_KEY = "onion_private_key"
+    private const val KEY_FORCE_PORTRAIT = "force_portrait"
+    private const val KEY_CUSTOM_DNS = "custom_dns"
 
     const val THEME_SYSTEM = 0
     const val THEME_LIGHT = 1
@@ -96,7 +98,7 @@ object Prefs {
     fun setOnionPort(ctx: Context, port: Int) { prefs(ctx).edit().putInt(KEY_ONION_PORT, port).apply() }
 
     fun getNgrokToken(ctx: Context): String = prefs(ctx).getString(KEY_NGROK_TOKEN, "") ?: ""
-    fun setNgrokToken(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_NGROK_TOKEN, v).apply() }
+    fun setNgrokToken(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_NGROK_TOKEN, v.trim()).apply() }
 
     fun getNgrokDomain(ctx: Context): String = prefs(ctx).getString(KEY_NGROK_DOMAIN, "") ?: ""
     fun setNgrokDomain(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_NGROK_DOMAIN, v.trim()).apply() }
@@ -115,6 +117,12 @@ object Prefs {
 
     fun getCloudflaredAddress(ctx: Context): String = prefs(ctx).getString(KEY_CLOUDFLARED_ADDRESS, "") ?: ""
     fun setCloudflaredAddress(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_CLOUDFLARED_ADDRESS, v).apply() }
+
+    fun isForcePortrait(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_FORCE_PORTRAIT, false)
+    fun setForcePortrait(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_FORCE_PORTRAIT, v).apply() }
+
+    fun getCustomDns(ctx: Context): String = prefs(ctx).getString(KEY_CUSTOM_DNS, "") ?: ""
+    fun setCustomDns(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_CUSTOM_DNS, v.trim()).apply() }
 
     fun applyTheme(ctx: Context) {
         val theme = getTheme(ctx)

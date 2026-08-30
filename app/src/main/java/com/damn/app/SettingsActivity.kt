@@ -62,6 +62,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.passwordSwitch.isChecked = Prefs.isPasswordEnabled(this)
         binding.passwordInput.setText(Prefs.getPassword(this))
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(this)
+        binding.portraitSwitch.isChecked = Prefs.isForcePortrait(this)
+        binding.dnsInput.setText(Prefs.getCustomDns(this))
     }
 
     private fun initTorTab() {
@@ -132,6 +134,8 @@ class SettingsActivity : AppCompatActivity() {
         Prefs.setPasswordEnabled(this, binding.passwordSwitch.isChecked)
         Prefs.setPassword(this, binding.passwordInput.text.toString())
         Prefs.setShutdownOnDisconnect(this, binding.shutdownSwitch.isChecked)
+        Prefs.setForcePortrait(this, binding.portraitSwitch.isChecked)
+        Prefs.setCustomDns(this, binding.dnsInput.text.toString())
         
         // Port Sync (check which tab is active to prioritize, but generally we sync all)
         val activeTab = binding.tabLayout.selectedTabPosition
@@ -147,7 +151,7 @@ class SettingsActivity : AppCompatActivity() {
         Prefs.setOnionPort(this, onionPort)
         
         // Ngrok specific
-        Prefs.setNgrokToken(this, binding.ngrokTokenInput.text.toString())
+        Prefs.setNgrokToken(this, binding.ngrokTokenInput.text.toString().trim())
         Prefs.setNgrokDomain(
             this,
             binding.ngrokDomainInput.text.toString()

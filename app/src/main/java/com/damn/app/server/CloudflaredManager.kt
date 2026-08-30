@@ -96,7 +96,15 @@ class CloudflaredManager(private val context: Context) {
                     Log.i(TAG, "Trying cloudflared: ${cArgs.joinToString(" ")}")
                     try {
                         val pb = ProcessBuilder(cArgs).redirectErrorStream(true)
-                        pb.environment()["HOME"] = context.filesDir.absolutePath
+                        val env = pb.environment()
+                        env["HOME"] = context.filesDir.absolutePath
+                        env["TMPDIR"] = context.cacheDir.absolutePath
+                        env["TEMP"] = context.cacheDir.absolutePath
+                        // Force Go to use the system resolver (Bionic) instead of looking for /etc/resolv.conf
+                        env["GODEBUG"] = "netdns=cgo"
+                        // Limit Go to 1 OS thread/core to prevent "read interrupted" crashes on modern Android kernels
+                        env["GOMAXPROCS"] = "1"
+                        
                         process = pb.start()
                         bin = candidate
                         started = true

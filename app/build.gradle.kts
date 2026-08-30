@@ -28,8 +28,8 @@ android {
         applicationId = "com.damn.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 15
-        versionName = "15.0.0"
+        versionCode = 17
+        versionName = "17.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,9 +70,13 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.8")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.4")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-service:2.11.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
+    implementation("com.airbnb.android:lottie:6.1.0")
     implementation("info.guardianproject.netcipher:netcipher:2.1.0")
     implementation("info.guardianproject:jtorctl:0.4.5.7")
     implementation("info.guardianproject:tor-android:0.4.9.11")
