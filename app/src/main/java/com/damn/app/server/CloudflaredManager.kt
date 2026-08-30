@@ -55,7 +55,8 @@ class CloudflaredManager(private val context: Context) {
         var bin: File? = null
         for (c in candidates) if (c.exists() && c.canRead()) { bin = c; break }
         if (bin == null || !bin.exists()) {
-            onError("cloudflared binary missing - add jniLibs/arm64-v8a/libcloudflared.so or copy Termux binary: in Termux run `cp \$PREFIX/bin/cloudflared /sdcard/Download/libcloudflared.so` then restart CF")
+            val abi = android.os.Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"
+            onError("Cloudflare: binary not found for $abi architecture. (Note: Project only bundles arm64-v8a by default). Use 'Import' in Advanced settings to provide a compatible binary for this device.")
             return
         }
         // Ensure executable (nativeLibraryDir already exec, filesDir will fail on W^X but we fallback)
