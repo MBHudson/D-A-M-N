@@ -622,7 +622,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="Cloudflare Tunnel"
+                        android:text="Cloudflare Configuration"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -681,17 +681,6 @@
                             android:inputType="textPassword"
                             android:textColor="@color/white" />
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/importCfBtn"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:layout_marginTop="10dp"
-                        android:text="Import cloudflared binary"
-                        android:textSize="12sp"
-                        app:strokeColor="@color/damn_accent"
-                        android:textColor="@color/damn_accent" />
 
                     <TextView
                         android:id="@+id/cfStatusText"
@@ -835,6 +824,17 @@
                             android:inputType="number"
                             android:textColor="@color/white" />
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/importCfBtn"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="10dp"
+                        android:text="Import cloudflared binary"
+                        android:textSize="12sp"
+                        app:strokeColor="@color/damn_accent"
+                        android:textColor="@color/damn_accent" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/resetBtn"

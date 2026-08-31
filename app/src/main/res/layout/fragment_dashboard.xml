@@ -92,7 +92,7 @@
                 <HorizontalScrollView
                     android:id="@+id/chartScroll"
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
+                    android:layout_height="320dp"
                     android:fillViewport="true"
                     android:overScrollMode="never"
                     android:scrollbars="none"

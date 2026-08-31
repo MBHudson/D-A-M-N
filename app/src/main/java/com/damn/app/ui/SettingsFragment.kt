@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,7 +19,7 @@ import com.damn.app.databinding.FragmentSettingsBinding
 import com.damn.app.util.Prefs
 import java.io.File
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
@@ -46,6 +47,46 @@ class SettingsFragment : Fragment() {
             }
         }
         binding.importCfBtn.setOnClickListener { importCfLauncher.launch(arrayOf("*/*")) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireContext().getSharedPreferences("damn_prefs", Context.MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(this)
+        updateStatusIndicators()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        requireContext().getSharedPreferences("damn_prefs", Context.MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (isAdded && _binding != null) {
+            activity?.runOnUiThread {
+                updateStatusIndicators()
+            }
+        }
+    }
+
+    private fun updateStatusIndicators() {
+        val ctx = context ?: return
+        val onion = Prefs.getOnionAddress(ctx)
+        binding.torOnionAddressText.text = if (onion.isNotEmpty()) onion else "Not connected"
+
+        val ngrokAddr = Prefs.getNgrokAddress(ctx)
+        binding.ngrokStatusText.text = if (ngrokAddr.isNotEmpty()) "Ngrok active: $ngrokAddr" else "Ngrok not active"
+
+        val cfAddr = Prefs.getCloudflaredAddress(ctx)
+        binding.cfStatusText.text = if (cfAddr.isNotEmpty()) "Cloudflare active: $cfAddr" else "Cloudflare not active — leave token blank for free quick tunnel"
+        
+        // Also update the binary check message
+        val hasBin = File(ctx.filesDir, "bin/cloudflared").exists() || 
+                     File(ctx.applicationInfo.nativeLibraryDir, "libcloudflared.so").exists()
+        if (!hasBin && cfAddr.isEmpty()) {
+            binding.cfStatusText.text = "Cloudflare: no binary — tap Import in Advanced section"
+        }
     }
 
     private fun setupCollapsibles() {
@@ -144,21 +185,14 @@ class SettingsFragment : Fragment() {
 
         binding.torLocalPortInput.setText(Prefs.getTorLocalPort(ctx).toString())
         binding.torOnionPortInput.setText(Prefs.getOnionPort(ctx).toString())
-        val onion = Prefs.getOnionAddress(ctx)
-        binding.torOnionAddressText.text = if (onion.isNotEmpty()) onion else "Not connected"
 
         binding.ngrokLocalPortInput.setText(Prefs.getNgrokLocalPort(ctx).toString())
         binding.ngrokTokenInput.setText(Prefs.getNgrokToken(ctx))
         binding.ngrokDomainInput.setText(Prefs.getNgrokDomain(ctx))
-        val ngrokAddr = Prefs.getNgrokAddress(ctx)
-        binding.ngrokStatusText.text = if (ngrokAddr.isNotEmpty()) "Ngrok active: $ngrokAddr" else "Ngrok not active"
 
         binding.cfLocalPortInput.setText(Prefs.getCfLocalPort(ctx).toString())
         binding.cfTokenInput.setText(Prefs.getCloudflaredToken(ctx))
-        val cfAddr = Prefs.getCloudflaredAddress(ctx)
-        binding.cfStatusText.text = if (cfAddr.isNotEmpty()) "Cloudflare active: $cfAddr" else "Cloudflare not active — leave token blank for free quick tunnel"
-        val hasBin = File(requireContext().filesDir, "bin/cloudflared").exists() || File(requireContext().applicationInfo.nativeLibraryDir, "libcloudflared.so").exists()
-        if (!hasBin) binding.cfStatusText.text = "Cloudflare: no binary — tap Import (needs Termux: cp \$PREFIX/bin/cloudflared /sdcard/Download/… then pick it)"
+        updateStatusIndicators()
     }
 
     private fun importCloudflared(uri: Uri) {
