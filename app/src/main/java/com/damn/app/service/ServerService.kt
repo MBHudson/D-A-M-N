@@ -409,6 +409,12 @@ class ServerService : Service() {
     }
 
     private fun log(msg: String) {
+        // Filter out noisy warnings/errors per user request
+        if (msg.contains("[warn] No lists of TLS groups were supported", ignoreCase = true)) return
+        if (msg.contains("Thank you for trying Cloudflare Tunnel", ignoreCase = true)) return
+        if (msg.contains("is giving Tor only an IP address", ignoreCase = true)) return
+        if (msg.contains("NAT failed: No UPnP IGD found", ignoreCase = true)) return
+
         Log.i(TAG, msg)
         logs.add(msg)
         if (logs.size > 400) logs.removeAt(0)
