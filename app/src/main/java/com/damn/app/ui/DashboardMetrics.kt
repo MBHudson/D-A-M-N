@@ -71,7 +71,7 @@ object DashboardMetrics {
         "engine" to NodeInfo(10,"green","online","localhost:8080",true),
         "dns" to NodeInfo(14,"green","online","127.0.0.1 • dns",true),
         "firewall" to NodeInfo(18,"green","online","filter active",true),
-        "nat" to NodeInfo(-1,"red","offline","public ip",true),
+        "nat" to NodeInfo(-2,"yellow","checking","public ip",true),
         "tor" to NodeInfo(-1,"red","offline","onion",false),
         "ngrok" to NodeInfo(-1,"red","offline","ngrok.io",false),
         "cf" to NodeInfo(-1,"red","offline","trycloudflare",false)
@@ -114,6 +114,107 @@ object DashboardMetrics {
                 pingAllInRandomOrder()
                 delay(2000)
             }
+        }
+    }
+
+    fun triggerManualPing(key: String) {
+        val ctx = appContext ?: return
+        if (!running) return
+
+        // Immediate UI feedback: set to checking
+        internalNodes[key]?.let {
+            it.status = "checking"
+            it.color = "yellow"
+            _nodes.value = internalNodes.toMap()
+        }
+
+        scope.launch {
+            val port = try { Prefs.getPort(ctx) } catch (_: Exception) { 8080 }
+            val svc = ServerService.instance
+            val externalIp = try { svc?.getExternalIp() ?: FileUtils.getExternalIpViaWeb() } catch (_: Exception) { null }
+            val dnsHost = try { Prefs.getCustomDns(ctx).takeIf { it.isNotBlank() } ?: "8.8.8.8" } catch (_: Exception) { "8.8.8.8" }
+
+            val ping = when (key) {
+                "host" -> if (Prefs.hasHost(ctx)) measurePing("127.0.0.1", port) else -1
+                "engine" -> measurePing("127.0.0.1", port)
+                "dns" -> measurePing(dnsHost, 53)
+                "firewall" -> measurePing("1.1.1.1", 53)
+                "nat" -> if (Prefs.isNatEnabled(ctx)) { if (externalIp != null) measurePing(externalIp, 53) else -2 } else -1
+                "tor" -> {
+                    val addr = try { Prefs.getOnionAddress(ctx) } catch (_: Exception) { "" }
+                    if (!Prefs.isTorEnabled(ctx)) -1 else if (addr.isEmpty()) -2 else measureTorPing(2500)
+                }
+                "ngrok" -> {
+                    val addr = try { Prefs.getNgrokAddress(ctx) } catch (_: Exception) { "" }
+                    if (!Prefs.isNgrokEnabled(ctx)) -1 else if (addr.isEmpty()) -2 else {
+                        val h = parseHostFromUrl(addr)
+                        if (h == null) -1 else {
+                            val p = measurePing(h, 443, 2000)
+                            if (p < 0) {
+                                val ep = measurePing("8.8.8.8", 53, 1000)
+                                if (ep > 0) ep else -1
+                            } else p
+                        }
+                    }
+                }
+                "cf" -> {
+                    val addr = try { Prefs.getCloudflaredAddress(ctx) } catch (_: Exception) { "" }
+                    if (!Prefs.isCloudflaredEnabled(ctx)) -1 else if (addr.isEmpty()) -2 else {
+                        val h = parseHostFromUrl(addr)
+                        if (h == null) -1 else {
+                            val p = measurePing(h, 443, 2000)
+                            if (p < 0) {
+                                val ep = measurePing("1.1.1.1", 443, 1000)
+                                if (ep > 0) ep else -1
+                            } else p
+                        }
+                    }
+                }
+                else -> -1
+            }
+
+            val enabled = when (key) {
+                "host" -> Prefs.hasHost(ctx)
+                "nat" -> Prefs.isNatEnabled(ctx)
+                "tor" -> Prefs.isTorEnabled(ctx)
+                "ngrok" -> Prefs.isNgrokEnabled(ctx)
+                "cf" -> Prefs.isCloudflaredEnabled(ctx)
+                else -> true
+            }
+
+            val col = pingToColor(ping)
+            val st = when {
+                !enabled -> "offline"
+                ping == -2 -> "checking"
+                ping < 0 -> "offline"
+                ping > 500 -> "checking"
+                else -> "online"
+            }
+
+            internalNodes[key]?.let { info ->
+                info.ping = ping
+                info.color = col
+                info.status = st
+                // Update IP if it changed/became available
+                info.ip = when (key) {
+                    "nat" -> externalIp ?: info.ip
+                    "tor" -> try { Prefs.getOnionAddress(ctx).ifEmpty { info.ip } } catch (_: Exception) { info.ip }
+                    "ngrok" -> try { Prefs.getNgrokAddress(ctx).ifEmpty { info.ip } } catch (_: Exception) { info.ip }
+                    "cf" -> try { Prefs.getCloudflaredAddress(ctx).ifEmpty { info.ip } } catch (_: Exception) { info.ip }
+                    else -> info.ip
+                }
+            }
+
+            if (key in pingHistInternal) {
+                val v = if (ping > 0) ping else 0
+                pingHistInternal[key]?.let { list ->
+                    list.add(v)
+                    if (list.size > 30) list.removeAt(0)
+                }
+            }
+
+            _nodes.value = internalNodes.toMap()
+            _pingHist.value = pingHistInternal.mapValues { it.value.toList() }
         }
     }
 
@@ -192,15 +293,28 @@ object DashboardMetrics {
     }
 
     private fun pingToColor(p: Int): String = when {
+        p == -2 -> "yellow"
         p < 0 -> "red"; p < 200 -> "green"; p < 500 -> "yellow"; else -> "red"
     }
 
-    private suspend fun measurePing(host: String, port: Int, timeout: Int = 1400): Int = withContext(Dispatchers.IO) {
+    private suspend fun measurePing(host: String, port: Int, timeout: Int = 2000): Int = withContext(Dispatchers.IO) {
         try {
             val start = System.currentTimeMillis()
             Socket().use { s -> s.connect(InetSocketAddress(host, port), timeout) }
             val elapsed = (System.currentTimeMillis() - start).toInt().coerceAtLeast(1)
-            if (elapsed > 2000) -1 else elapsed
+            if (elapsed > timeout) -1 else elapsed
+        } catch (_: Exception) { -1 }
+    }
+
+    private suspend fun measureTorPing(timeout: Int = 3000): Int = withContext(Dispatchers.IO) {
+        try {
+            val start = System.currentTimeMillis()
+            val proxy = java.net.Proxy(java.net.Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
+            Socket(proxy).use { s ->
+                s.connect(InetSocketAddress("1.1.1.1", 443), timeout)
+            }
+            val elapsed = (System.currentTimeMillis() - start).toInt().coerceAtLeast(1)
+            if (elapsed > timeout) -1 else elapsed
         } catch (_: Exception) { -1 }
     }
 
@@ -232,20 +346,46 @@ object DashboardMetrics {
         tasks.add("engine" to suspend { if (hasHost) measurePing("127.0.0.1", port) else -1 })
         tasks.add("dns" to suspend { measurePing(dnsHost, 53) })
         tasks.add("firewall" to suspend { measurePing("1.1.1.1", 53) })
-        tasks.add("nat" to suspend { if (natEnabled) measurePing(externalIp ?: "8.8.4.4", 53) else -1 })
-        tasks.add("tor" to suspend { if (torEnabled) measurePing("127.0.0.1", 9050) else -1 })
+        tasks.add("nat" to suspend { if (natEnabled) { if (externalIp != null) measurePing(externalIp, 53) else -2 } else -1 })
+        tasks.add("tor" to suspend {
+            if (!torEnabled) -1
+            else {
+                val addr = try { Prefs.getOnionAddress(ctx) } catch (_:Exception){ "" }
+                if (addr.isEmpty()) -2
+                else {
+                    val p = measureTorPing(2500)
+                    if (p < 0) -1 else p
+                }
+            }
+        })
         tasks.add("ngrok" to suspend {
             if (!ngrokEnabled) -1 else {
                 val addr = try { Prefs.getNgrokAddress(ctx) } catch (_:Exception){ "" }
-                val h = parseHostFromUrl(addr) ?: "8.8.8.8"
-                if (addr.isNotEmpty()) measurePing(h, 443) else measurePing("8.8.8.8", 53)
+                if (addr.isEmpty()) -2 else {
+                    val h = parseHostFromUrl(addr)
+                    if (h == null) -1 else {
+                        val p = measurePing(h, 443, 2000)
+                        if (p < 0) {
+                            val ep = measurePing("8.8.8.8", 53, 1000)
+                            if (ep > 0) ep else -1
+                        } else p
+                    }
+                }
             }
         })
         tasks.add("cf" to suspend {
             if (!cfEnabled) -1 else {
                 val addr = try { Prefs.getCloudflaredAddress(ctx) } catch (_:Exception){ "" }
-                val h = parseHostFromUrl(addr) ?: "1.1.1.1"
-                if (addr.isNotEmpty()) measurePing(h, 443) else measurePing("1.1.1.1", 443)
+                if (addr.isEmpty()) -2 else {
+                    val h = parseHostFromUrl(addr)
+                    if (h == null) -1 else {
+                        val p = measurePing(h, 443, 2000)
+                        if (p < 0) {
+                            val ep = measurePing("1.1.1.1", 443, 1000)
+                            if (ep > 0) ep else -1
+                        } else p
+                    }
+                }
             }
         })
 
@@ -268,6 +408,7 @@ object DashboardMetrics {
             val col = pingToColor(ping)
             val st = when {
                 !enabled -> "offline"
+                ping == -2 -> "checking"
                 ping < 0 -> "offline"
                 ping > 500 -> "checking"
                 else -> "online"

@@ -24,9 +24,9 @@
     <string name="nat_active">✓ NAT Active</string>
     <string name="settings">Settings</string>
     <string name="theme_selection">Theme</string>
-    <string name="theme_system">System Theme (default)</string>
+    <string name="theme_system">System Theme</string>
     <string name="theme_light">Light</string>
-    <string name="theme_dark">Dark</string>
+    <string name="theme_dark">Dark (default)</string>
     <string name="save">Save</string>
     <string name="notif_channel_name">DAMN Server</string>
     <string name="notif_channel_desc">Shows while DAMN file server is running</string>
@@ -47,5 +47,5 @@
     <string name="developer_name">MBHudson</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="advanced_experimental">Advanced (Experimental)</string>
-    <string name="experimental_warning">Do you want your app to crash, because this is how you get your app to crash</string>
+    <string name="experimental_warning">Do you want the app to crash, because this is how you crash the app?!</string>
 </resources>

@@ -156,10 +156,10 @@ class DashboardFragment : Fragment() {
             topRow.addView(createEndpoint(false, worldIp))
 
             // Middle: Firewall
-            midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = false))
+            midRow.addView(createNode("firewall", "Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = false))
 
             // Bottom: NAT -> YOU
-            bottomRow.addView(createNode("NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = false))
+            bottomRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = false))
             bottomRow.addView(createAnimatedConnector("live", false))
             bottomRow.addView(createEndpoint(true, youIp))
         } else {
@@ -175,25 +175,25 @@ class DashboardFragment : Fragment() {
             val tunnels = listOf("tor" to nodes["tor"], "ngrok" to nodes["ngrok"], "cf" to nodes["cf"]).filter { it.second?.enabled == true }
             tunnels.forEach { (k, n) ->
                 topRow.addView(createAnimatedConnector("live", true))
-                topRow.addView(createNode(if (k == "tor") "Tor Onion" else k.uppercase(), n?.ip ?: "—", n!!, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+                topRow.addView(createNode(k, if (k == "tor") "Tor Onion" else k.uppercase(), n?.ip ?: "—", n!!, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
             }
 
             // Middle: Firewall
-            midRow.addView(createNode("Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = true))
+            midRow.addView(createNode("firewall", "Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = true))
 
             // Bottom: NAT -> (PHP ENGINE OR LISTENER) -> HOST -> YOU
-            bottomRow.addView(createNode("NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
+            bottomRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
             bottomRow.addView(createAnimatedConnector("live", true))
             
             if (phpEnabled) {
-                bottomRow.addView(createNode("PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+                bottomRow.addView(createNode("engine", "PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
                 bottomRow.addView(createAnimatedConnector(hostN.color, true))
-                bottomRow.addView(createNode("HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
+                bottomRow.addView(createNode("host", "HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
             } else if (listenerEnabled) {
                 val proxyHost = Prefs.getProxyHost(ctx).ifEmpty { "127.0.0.1" }
                 val proxyPort = Prefs.getProxyPort(ctx)
                 val proxyNode = engN.copy(ip = "$proxyHost:$proxyPort")
-                bottomRow.addView(createNode("Listener", "$proxyHost:$proxyPort", proxyNode, isFirewall = false, iconType = "router", hidePing = false, isRunning = true))
+                bottomRow.addView(createNode("engine", "Listener", "$proxyHost:$proxyPort", proxyNode, isFirewall = false, iconType = "router", hidePing = false, isRunning = true))
             }
             
             bottomRow.addView(createAnimatedConnector("live", true))
@@ -231,7 +231,7 @@ class DashboardFragment : Fragment() {
         sView.updatePath(startX, startY, fwTopX, fwTopY, fwBottomX, fwBottomY, endX, endY)
     }
 
-    private fun createNode(title: String, sub: String, info: DashboardMetrics.NodeInfo, isFirewall: Boolean = false, iconType: String = "default", hidePing: Boolean = false, isRunning: Boolean = true): View {
+    private fun createNode(key: String, title: String, sub: String, info: DashboardMetrics.NodeInfo, isFirewall: Boolean = false, iconType: String = "default", hidePing: Boolean = false, isRunning: Boolean = true): View {
         val ctx = context ?: return View(requireContext())
         // sizing: firewall 20% smaller than previous 88 -> 70, others 10% smaller 88->79, padding/icon/text scaled accordingly
         val isFw = isFirewall
@@ -259,6 +259,14 @@ class DashboardFragment : Fragment() {
             }
             strokeColor = strokeCol
             alpha = if (!info.enabled) 0.45f else 1f
+
+            setOnClickListener {
+                DashboardMetrics.triggerManualPing(key)
+                animate().scaleX(0.92f).scaleY(0.92f).setDuration(80).withEndAction {
+                    animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+                }.start()
+            }
+
             // add subtle glitch background for firewall
             if (isFirewall) {
                 // fire distressed animation via background tint pulse - handled via animator below
@@ -653,9 +661,10 @@ class DashboardFragment : Fragment() {
                 val isServerRunning = ServerService.instance?.isRunning() == true
 
                 if (soundEnabled && isServerRunning && nodes.isNotEmpty()) {
-                    // Check for any enabled node that is offline
-                    val hasOffline = nodes.values.any { it.enabled && it.status == "offline" }
-                    if (hasOffline) {
+                    // Only monitor tunnels as requested: tor, ngrok, cf
+                    val monitorKeys = setOf("tor", "ngrok", "cf")
+                    val hasOfflineTunnel = nodes.filter { it.key in monitorKeys }.values.any { it.enabled && it.status == "offline" }
+                    if (hasOfflineTunnel) {
                         toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
                     }
                 }

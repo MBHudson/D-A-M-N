@@ -82,12 +82,21 @@ class PhpFileServer(
                 val out = s.getOutputStream()
                 val requestLine = readHttpLine(input) ?: return
                 val parts = requestLine.split(" ")
-                if (parts.size < 2) { sendError(out, 400, "Bad Request"); return }
+                if (parts.size < 2) { 
+                    sendError(out, 400, "Bad Request")
+                    log("400 BAD REQUEST: $requestLine")
+                    return 
+                }
                 val method = parts[0].uppercase()
-                if (method !in setOf("GET", "HEAD", "POST", "OPTIONS")) { sendError(out, 405, "Method Not Allowed"); return }
+                if (method !in setOf("GET", "HEAD", "POST", "OPTIONS")) { 
+                    sendError(out, 405, "Method Not Allowed")
+                    log("405 $method ${parts[1]}")
+                    return 
+                }
                 val query = parts[1].substringAfter("?", "")
                 val rawPath = parts[1].substringBefore("?")
                 val decodedPath = URLDecoder.decode(rawPath, "UTF-8")
+                val logReq = { code: Int -> log("$code $method $decodedPath") }
                 
                 var authHeader: String? = null
                 var contentLength = 0
@@ -108,6 +117,7 @@ class PhpFileServer(
                     w.write("Access-Control-Allow-Headers: Content-Type\r\n")
                     w.write("Connection: close\r\n\r\n")
                     w.flush()
+                    logReq(204)
                     return
                 }
 
@@ -127,11 +137,13 @@ class PhpFileServer(
                 if (!password.isNullOrBlank()) {
                     if (authHeader == null || !authHeader.startsWith("Basic ", ignoreCase = true)) {
                         sendUnauthorized(out)
+                        logReq(401)
                         return
                     }
                     val credentials = String(android.util.Base64.decode(authHeader.substringAfter("Basic ").trim(), android.util.Base64.NO_WRAP))
                     if ((if (credentials.contains(":")) credentials.substringAfter(":") else credentials) != password) {
                         sendUnauthorized(out)
+                        logReq(401)
                         return
                     }
                 }
@@ -139,17 +151,21 @@ class PhpFileServer(
                 if (decodedPath == "/favicon.ico" || decodedPath == "/favicon.png") {
                     val bytes = android.util.Base64.decode(Favicon.PNG_BASE64, android.util.Base64.NO_WRAP)
                     sendResponse(out, 200, "OK", "image/png", bytes, method == "HEAD")
+                    logReq(200)
                     return
                 }
 
                 if (decodedPath.endsWith("/signal.php") || decodedPath == "/signal.php") {
                     handleSignal(out, method, decodedPath, bodyBytes, query)
+                    logReq(200)
                     return
                 }
 
                 var node = vfs.getMetadata(decodedPath)
                 if (node == null) {
-                    sendError(out, 404, "Not Found"); return
+                    sendError(out, 404, "Not Found")
+                    logReq(404)
+                    return
                 }
 
                 if (node.isDirectory) {
@@ -161,6 +177,7 @@ class PhpFileServer(
                         else -> {
                             val html = directoryListing(decodedPath, vfs.listChildren(decodedPath))
                             sendResponse(out, 200, "OK", "text/html; charset=utf-8", html.toByteArray(), method == "HEAD")
+                            logReq(200)
                             return
                         }
                     }
@@ -170,13 +187,18 @@ class PhpFileServer(
                 if (node.name.endsWith(".php", ignoreCase = true) && !forceDownload) {
                     val rendered = phpEngine.render(node.path, vfs, cacheDir ?: File("/tmp"))
                     sendResponse(out, 200, "OK", "text/html; charset=utf-8", rendered.toByteArray(), method == "HEAD")
+                    logReq(200)
                 } else {
                     val mime = if (forceDownload) "application/octet-stream" else mimeFor(node.name)
                     sendVfsFile(out, 200, "OK", mime, node, method == "HEAD", forceDownload)
+                    logReq(200)
                 }
             } catch (e: Exception) {
                 Log.w("DAMN-Server", "handle error", e)
-                try { sendError(s.getOutputStream(), 500, "Internal Error") } catch (_: Exception) {}
+                try { 
+                    sendError(s.getOutputStream(), 500, "Internal Error")
+                    log("500 ERROR")
+                } catch (_: Exception) {}
             }
         }
     }
