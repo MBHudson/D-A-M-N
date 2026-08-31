@@ -28,9 +28,9 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark (default)</string>
     <string name="save">Save</string>
-    <string name="notif_channel_name">DAMN Server</string>
+    <string name="notif_channel_name">D·A·M·N Server</string>
     <string name="notif_channel_desc">Shows while DAMN file server is running</string>
-    <string name="notif_title">DAMN Server running</string>
+    <string name="notif_title">D·A·M·N Server running</string>
     <string name="notif_text">Serving %1$s on port %2$d</string>
     <string name="notif_boot_ready_title">Server ready to start</string>
     <string name="notif_boot_ready_text">Tap to start serving %1$s</string>

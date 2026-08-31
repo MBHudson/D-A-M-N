@@ -155,7 +155,7 @@
                         android:lineSpacingExtra="2dp"
                         android:fontFamily="monospace"
                         android:textIsSelectable="true"
-                        android:text="DAMN ready.\n" />
+                        android:text="D·A·M·N ready.\n" />
                 </ScrollView>
 
                 <ImageButton

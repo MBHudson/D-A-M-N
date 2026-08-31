@@ -53,7 +53,7 @@ class PhpFileServer(
             }
         }
         running.set(true)
-        log("DAMN server listening on [::]:$port root=${vfs.getRootName()}")
+        log("D·A·M·N server listening on [::]:$port root=${vfs.getRootName()}")
         acceptThread = Thread({
             while (running.get()) {
                 try {
@@ -283,7 +283,7 @@ class PhpFileServer(
     }
 
     private fun sendError(out: OutputStream, code: Int, msg: String) {
-        val html = "<html><body><h1>$code $msg</h1><p>DAMN Server</p></body></html>"
+        val html = "<html><body><h1>$code $msg</h1><p>D·A·M·N Server</p></body></html>"
         sendResponse(out, code, msg, "text/html", html.toByteArray(), false)
     }
 
