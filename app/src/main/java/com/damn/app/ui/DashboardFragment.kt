@@ -214,7 +214,11 @@ class DashboardFragment : Fragment() {
             .scaleX(currentZoom)
             .scaleY(currentZoom)
             .setDuration(200)
-            .setUpdateListener { updateSPath() }
+            .setUpdateListener {
+                updateSPath()
+                // Force parent to re-evaluate scroll bounds if needed
+                binding.zoomContainer.parent.requestLayout()
+            }
             .start()
     }
 
@@ -240,9 +244,9 @@ class DashboardFragment : Fragment() {
             return r
         }
 
-        val lastTopRect = getRelativeRect(lastTop, zoomCont)
-        val fwViewRect = getRelativeRect(fwView, zoomCont)
-        val firstBottomRect = getRelativeRect(firstBottom, zoomCont)
+        val lastTopRect = getRelativeRect(lastTop, rowsCont)
+        val fwViewRect = getRelativeRect(fwView, rowsCont)
+        val firstBottomRect = getRelativeRect(firstBottom, rowsCont)
 
         val startX = lastTopRect.right.toFloat()
         val startY = lastTopRect.centerY().toFloat()
