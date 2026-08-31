@@ -2,8 +2,7 @@ package com.damn.app.ui
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
-import android.graphics.Color
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -38,6 +37,8 @@ class DashboardFragment : Fragment() {
     private var toneGen: ToneGenerator? = null
     private var beepJob: Job? = null
 
+    private var currentZoom = 1.0f
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         return binding.root
@@ -47,6 +48,9 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.fullscreenBtn.setOnClickListener { toggleFullscreen() }
         binding.speedBtn.setOnClickListener { runSpeedTest() }
+        binding.zoomInBtn.setOnClickListener { changeZoom(0.1f) }
+        binding.zoomOutBtn.setOnClickListener { changeZoom(-0.1f) }
+
         if (ServerService.instance?.isRunning() == true) {
             DashboardMetrics.start(requireContext().applicationContext)
         }
@@ -204,29 +208,54 @@ class DashboardFragment : Fragment() {
         binding.routingContainer.post { updateSPath() }
     }
 
+    private fun changeZoom(delta: Float) {
+        currentZoom = (currentZoom + delta).coerceIn(0.4f, 2.0f)
+        binding.zoomContainer.animate()
+            .scaleX(currentZoom)
+            .scaleY(currentZoom)
+            .setDuration(200)
+            .setUpdateListener { updateSPath() }
+            .start()
+    }
+
     private fun updateSPath() {
         if (_binding == null) return
-        val container = binding.routingContainer
         val topRow = binding.topRow
         val midRow = binding.midRow
         val bottomRow = binding.bottomRow
         val sView = binding.sPathView
+        val zoomCont = binding.zoomContainer
+        val rowsCont = binding.rowsContainer
+        
         if (topRow.childCount == 0 || midRow.childCount == 0 || bottomRow.childCount == 0) return
+        
         val lastTop = topRow.getChildAt(topRow.childCount - 1) ?: return
         val fwView = midRow.getChildAt(0) ?: return
         val firstBottom = bottomRow.getChildAt(0) ?: return
-        val containerLoc = IntArray(2).also { container.getLocationOnScreen(it) }
-        val lastLoc = IntArray(2).also { lastTop.getLocationOnScreen(it) }
-        val fwLoc = IntArray(2).also { fwView.getLocationOnScreen(it) }
-        val firstLoc = IntArray(2).also { firstBottom.getLocationOnScreen(it) }
-        val startX = (lastLoc[0] + lastTop.width - containerLoc[0]).toFloat()
-        val startY = (lastLoc[1] + lastTop.height / 2f - containerLoc[1]).toFloat()
-        val fwTopX = (fwLoc[0] + fwView.width / 2f - containerLoc[0]).toFloat()
-        val fwTopY = (fwLoc[1] - containerLoc[1]).toFloat()
+
+        // Robust coordinate mapping to zoomContainer space
+        fun getRelativeRect(child: View, ancestor: ViewGroup): Rect {
+            val r = Rect(0, 0, child.width, child.height)
+            ancestor.offsetDescendantRectToMyCoords(child, r)
+            return r
+        }
+
+        val lastTopRect = getRelativeRect(lastTop, zoomCont)
+        val fwViewRect = getRelativeRect(fwView, zoomCont)
+        val firstBottomRect = getRelativeRect(firstBottom, zoomCont)
+
+        val startX = lastTopRect.right.toFloat()
+        val startY = lastTopRect.centerY().toFloat()
+        
+        val fwTopX = fwViewRect.centerX().toFloat()
+        val fwTopY = fwViewRect.top.toFloat()
+        
         val fwBottomX = fwTopX
-        val fwBottomY = (fwLoc[1] + fwView.height - containerLoc[1]).toFloat()
-        val endX = (firstLoc[0] - containerLoc[0]).toFloat()
-        val endY = (firstLoc[1] + firstBottom.height / 2f - containerLoc[1]).toFloat()
+        val fwBottomY = fwViewRect.bottom.toFloat()
+        
+        val endX = firstBottomRect.left.toFloat()
+        val endY = firstBottomRect.centerY().toFloat()
+        
         sView.setFirewallColor("purple")
         sView.updatePath(startX, startY, fwTopX, fwTopY, fwBottomX, fwBottomY, endX, endY)
     }
