@@ -155,7 +155,7 @@
                         android:lineSpacingExtra="2dp"
                         android:fontFamily="monospace"
                         android:textIsSelectable="true"
-                        android:text="D·A·M·N ready.\n" />
+                        android:text="@string/terminal_welcome" />
                 </ScrollView>
 
                 <ImageButton

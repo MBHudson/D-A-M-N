@@ -48,4 +48,5 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="advanced_experimental">Advanced (Experimental)</string>
     <string name="experimental_warning">Do you want the app to crash, because this is how you crash the app?!</string>
+    <string name="terminal_welcome">D·A·M·N ready.\n-Touch globe to launch in browser\n-Long press address to copy\n-Touch dashboard node to ping\n</string>
 </resources>

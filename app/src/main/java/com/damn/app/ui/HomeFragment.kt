@@ -139,7 +139,6 @@ class HomeFragment : Fragment() {
         }
 
         refreshUi()
-        if (binding.logText.text.isEmpty()) appendLog("D·A·M·N ready. Select a folder/file and start.")
     }
 
     override fun onStart() {
