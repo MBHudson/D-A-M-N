@@ -34,6 +34,7 @@ import com.damn.app.util.Prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -120,6 +121,7 @@ class ServerService : Service() {
 
     override fun onDestroy() {
         stopServerInternal()
+        scope.cancel()
         instance = null
         super.onDestroy()
     }
@@ -144,7 +146,7 @@ class ServerService : Service() {
                 }
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
 
@@ -402,6 +404,7 @@ class ServerService : Service() {
     }
 
     private fun updateNotification() {
+        if (!isServiceActive) return
         val label = Prefs.getHostLabel(this).ifEmpty { "D·A·M·N" }
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         try { nm.notify(NOTIF_ID, buildNotification(getString(R.string.notif_text, label, currentPort))) } catch (_: Exception) {}

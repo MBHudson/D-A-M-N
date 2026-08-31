@@ -10,7 +10,6 @@ object Prefs {
     private const val KEY_IS_FILE = "is_file"
     private const val KEY_PORT = "port"
     private const val KEY_NAT = "nat_enabled"
-    private const val KEY_BOOT = "start_at_boot"
     private const val KEY_WAS_RUNNING = "was_running"
     private const val KEY_THEME = "theme"
     private const val KEY_PASS_ENABLED = "pass_enabled"
@@ -74,9 +73,6 @@ object Prefs {
 
     fun isNatEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_NAT, true)
     fun setNatEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_NAT, v).apply() }
-
-    fun isStartAtBoot(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_BOOT, false)
-    fun setStartAtBoot(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_BOOT, v).apply() }
 
     fun wasRunning(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_WAS_RUNNING, false)
     fun setWasRunning(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_WAS_RUNNING, v).apply() }

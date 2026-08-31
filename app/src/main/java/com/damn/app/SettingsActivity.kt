@@ -58,7 +58,6 @@ class SettingsActivity : AppCompatActivity() {
             Prefs.THEME_DARK -> binding.themeDark.isChecked = true
             else -> binding.themeSystem.isChecked = true
         }
-        binding.bootSwitch.isChecked = Prefs.isStartAtBoot(this)
         binding.passwordSwitch.isChecked = Prefs.isPasswordEnabled(this)
         binding.passwordInput.setText(Prefs.getPassword(this))
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(this)
@@ -130,7 +129,6 @@ class SettingsActivity : AppCompatActivity() {
         Prefs.setTheme(this, selectedTheme)
         
         // General
-        Prefs.setStartAtBoot(this, binding.bootSwitch.isChecked)
         Prefs.setPasswordEnabled(this, binding.passwordSwitch.isChecked)
         Prefs.setPassword(this, binding.passwordInput.text.toString())
         Prefs.setShutdownOnDisconnect(this, binding.shutdownSwitch.isChecked)

@@ -169,7 +169,6 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
             Prefs.THEME_SYSTEM -> binding.themeSystem.isChecked = true
             else -> binding.themeDark.isChecked = true
         }
-        binding.bootSwitch.isChecked = Prefs.isStartAtBoot(ctx)
         binding.passwordSwitch.isChecked = Prefs.isPasswordEnabled(ctx)
         binding.passwordInput.setText(Prefs.getPassword(ctx))
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(ctx)
@@ -219,7 +218,6 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
             else -> Prefs.THEME_SYSTEM
         }
         Prefs.setTheme(ctx, selectedTheme)
-        Prefs.setStartAtBoot(ctx, binding.bootSwitch.isChecked)
         Prefs.setPasswordEnabled(ctx, binding.passwordSwitch.isChecked)
         Prefs.setPassword(ctx, binding.passwordInput.text.toString())
         Prefs.setShutdownOnDisconnect(ctx, binding.shutdownSwitch.isChecked)
