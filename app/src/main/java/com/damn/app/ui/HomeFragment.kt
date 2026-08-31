@@ -39,7 +39,6 @@ class HomeFragment : Fragment() {
 
     private var boundService: ServerService? = null
     private var isBound = false
-    private var logsExpanded = true
     private var isFullscreen = false
 
     private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -122,14 +121,6 @@ class HomeFragment : Fragment() {
         // settingsBtn removed per spec — navigation now via bottom bar
         binding.fullscreenBtn.setOnClickListener { toggleFullscreen() }
 
-        binding.expandLogsBtn.setOnClickListener {
-            logsExpanded = !logsExpanded
-            val density = resources.displayMetrics.density
-            val targetHeight = if (logsExpanded) (180 * density).toInt() else (60 * density).toInt()
-            binding.logScroll.layoutParams.height = targetHeight
-            binding.logScroll.requestLayout()
-            binding.expandLogsBtn.animate().rotation(if (logsExpanded) 180f else 0f).setDuration(200).start()
-        }
 
         binding.portInput.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
