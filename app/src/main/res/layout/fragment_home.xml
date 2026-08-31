@@ -1,504 +1,290 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/damn_bg"
-    android:fillViewport="true">
+    android:padding="12dp">
 
-    <LinearLayout
+    <!-- Header -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/damn_card"
+        app:strokeColor="#1E293B"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Header — simplified: removed settings icon and status indicator bar -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="@color/damn_card"
-            app:strokeColor="#1E293B"
-            app:strokeWidth="1dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="13dp">
 
-            <LinearLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_subtitle_prefixed"
+                android:textColor="@color/damn_accent"
+                android:textSize="10sp"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="4dp"
+                android:alpha="0.8" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/fullscreenBtn"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_fullscreen"
+                app:tint="@color/damn_accent"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:contentDescription="Toggle Fullscreen" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Hosting Path Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/damn_card"
+        app:strokeColor="#1E293B"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/cardHeader">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:weightSum="2">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pickFileBtn"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="File"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:textSize="12sp"
+                app:strokeColor="@color/damn_accent"
+                android:textColor="@color/damn_accent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pickFolderBtn"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Folder"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:textSize="12sp"
+                app:strokeColor="@color/damn_accent"
+                android:textColor="@color/damn_accent" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Terminal Section - Fills available space -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/logsCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/damn_card"
+        app:strokeColor="#1E293B"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/cardPath"
+        app:layout_constraintBottom_toTopOf="@id/cardControls">
+
+        <ScrollView
+            android:id="@+id/logScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#0F172A"
+            android:nestedScrollingEnabled="true"
+            android:fillViewport="true">
+
+            <TextView
+                android:id="@+id/logText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="13dp">
+                android:textColor="#F8FAFC"
+                android:textSize="13sp"
+                android:lineSpacingExtra="2dp"
+                android:fontFamily="monospace"
+                android:textIsSelectable="true"
+                android:padding="8dp"
+                android:text="@string/terminal_welcome" />
+        </ScrollView>
+    </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:layout_width="wrap_content"
+    <!-- Port & Switches Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/damn_card"
+        app:strokeColor="#1E293B"
+        app:strokeWidth="1dp"
+        app:layout_constraintBottom_toTopOf="@id/cardUrls">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Port"
+                app:boxStrokeColor="@color/damn_accent"
+                app:hintTextColor="#94A3B8"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/portInput"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/app_name"
+                    android:inputType="number"
+                    android:text="8080"
+                    android:maxLength="5"
+                    android:ems="5"
                     android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:textSize="14sp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_subtitle_prefixed"
-                    android:textColor="@color/damn_accent"
-                    android:textSize="10sp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:alpha="0.8" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toggleBtn"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="72dp"
+                android:layout_height="48dp"
+                android:text="START"
+                android:textSize="9sp"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:gravity="center"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="10dp"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="top"
+                app:iconSize="18dp"
+                app:iconPadding="1dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                app:iconTint="@null" />
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
-                <ImageButton
-                    android:id="@+id/fullscreenBtn"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_fullscreen"
-                    app:tint="@color/damn_accent"
-                    android:padding="6dp"
-                    android:scaleType="centerInside"
-                    android:contentDescription="Toggle Fullscreen" />
-
-                <!-- settingsBtn REMOVED per spec -->
-                <!-- statusContainer REMOVED per spec — banner indicator freed -->
-
+            <!-- Switches Group -->
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NAT" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/natSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tor" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/torSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ngrok" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/ngrokSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/cloudflaredSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
+                </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <!-- Hosting Path Section — slimmed: label + path removed, only File/Folder buttons remain -->
-        <com.google.android.material.card.MaterialCardView
+    <!-- URLs Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardUrls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/damn_card"
+        app:strokeColor="#1E293B"
+        app:strokeWidth="1dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            app:cardCornerRadius="14dp"
-            app:cardBackgroundColor="@color/damn_card"
-            app:strokeColor="#1E293B"
-            app:strokeWidth="1dp">
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:weightSum="2">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/pickFileBtn"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="File"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:textSize="12sp"
-                    app:strokeColor="@color/damn_accent"
-                    android:textColor="@color/damn_accent" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/pickFolderBtn"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="Folder"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:textSize="12sp"
-                    app:strokeColor="@color/damn_accent"
-                    android:textColor="@color/damn_accent" />
+            <!-- Local -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Local" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:id="@+id/localUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
+                <ImageButton android:id="@+id/copyLocalBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Logs Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/logsCard"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="6dp"
-            app:cardCornerRadius="14dp"
-            app:cardBackgroundColor="@color/damn_card"
-            app:strokeColor="#1E293B"
-            app:strokeWidth="1dp">
-
-            <ScrollView
-                android:id="@+id/logScroll"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minHeight="120dp"
-                android:background="#0F172A"
-                android:nestedScrollingEnabled="true">
-
-                <TextView
-                    android:id="@+id/logText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#F8FAFC"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="2dp"
-                    android:fontFamily="monospace"
-                    android:textIsSelectable="true"
-                    android:padding="8dp"
-                    android:text="@string/terminal_welcome" />
-            </ScrollView>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Port, Tor & Ngrok Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            app:cardCornerRadius="14dp"
-            app:cardBackgroundColor="@color/damn_card"
-            app:strokeColor="#1E293B"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="12dp">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:hint="Port"
-                    app:boxStrokeColor="@color/damn_accent"
-                    app:hintTextColor="#94A3B8"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/portInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:text="8080"
-                        android:maxLength="5"
-                        android:ems="5"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/toggleBtn"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="72dp"
-                    android:layout_height="48dp"
-                    android:text="START"
-                    android:textSize="9sp"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:gravity="center"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    app:cornerRadius="10dp"
-                    app:icon="@drawable/ic_play"
-                    app:iconGravity="top"
-                    app:iconSize="18dp"
-                    app:iconPadding="1dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="4dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    app:iconTint="@null" />
-
-                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="0.5" />
-
-                <!-- NAT Switch -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="NAT"
-                        android:textColor="@color/white"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/natSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scaleX="0.7"
-                        android:scaleY="0.7" />
-                </LinearLayout>
-
-                <!-- Tor Switch -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="4dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tor"
-                        android:textColor="@color/white"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/torSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scaleX="0.7"
-                        android:scaleY="0.7" />
-                </LinearLayout>
-
-                <!-- Ngrok Switch -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="4dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ngrok"
-                        android:textColor="@color/white"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/ngrokSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scaleX="0.7"
-                        android:scaleY="0.7" />
-                </LinearLayout>
-
-                <!-- Cloudflared Switch -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="4dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CF"
-                        android:textColor="@color/white"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/cloudflaredSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scaleX="0.7"
-                        android:scaleY="0.7" />
-                </LinearLayout>
+            <!-- Public -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Public" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:id="@+id/publicUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
+                <ImageButton android:id="@+id/copyPublicBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-
-        <!-- URLs Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            app:cardCornerRadius="14dp"
-            app:cardBackgroundColor="@color/damn_card"
-            app:strokeColor="#1E293B"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Local"
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/localUrlText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="—"
-                        android:textColor="@color/damn_accent"
-                        android:textSize="11sp"
-                        android:layout_marginStart="8dp" />
-
-                    <ImageButton
-                        android:id="@+id/copyLocalBtn"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_globe"
-                        app:tint="@color/damn_accent"
-                        android:contentDescription="Open Local URL in browser" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Public"
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/publicUrlText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="—"
-                        android:textColor="@color/damn_accent"
-                        android:textSize="11sp"
-                        android:layout_marginStart="8dp" />
-
-                    <ImageButton
-                        android:id="@+id/copyPublicBtn"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_globe"
-                        app:tint="@color/damn_accent"
-                        android:contentDescription="Open Public URL in browser" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/onionRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    android:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tor"
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/onionUrlText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="—"
-                        android:textColor="@color/damn_accent"
-                        android:textSize="11sp"
-                        android:layout_marginStart="8dp" />
-
-                    <ImageButton
-                        android:id="@+id/copyOnionBtn"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_globe"
-                        app:tint="@color/damn_accent"
-                        android:contentDescription="Open in Tor Browser" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/ngrokRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    android:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ngrok"
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/ngrokUrlText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="—"
-                        android:textColor="@color/damn_accent"
-                        android:textSize="11sp"
-                        android:layout_marginStart="8dp" />
-
-                    <ImageButton
-                        android:id="@+id/copyNgrokBtn"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_globe"
-                        app:tint="@color/damn_accent"
-                        android:contentDescription="Open Ngrok URL in browser" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/cloudflaredRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    android:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CF"
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/cloudflaredUrlText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="—"
-                        android:textColor="@color/damn_accent"
-                        android:textSize="11sp"
-                        android:layout_marginStart="8dp" />
-
-                    <ImageButton
-                        android:id="@+id/copyCloudflaredBtn"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_globe"
-                        app:tint="@color/damn_accent"
-                        android:contentDescription="Open Cloudflare URL in browser" />
-                </LinearLayout>
-
+            <!-- Tor -->
+            <LinearLayout android:id="@+id/onionRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tor" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:id="@+id/onionUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
+                <ImageButton android:id="@+id/copyOnionBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-    </LinearLayout>
-</ScrollView>
+            <!-- Ngrok -->
+            <LinearLayout android:id="@+id/ngrokRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ngrok" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:id="@+id/ngrokUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
+                <ImageButton android:id="@+id/copyNgrokBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
+            </LinearLayout>
+
+            <!-- CF -->
+            <LinearLayout android:id="@+id/cloudflaredRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:id="@+id/cloudflaredUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
+                <ImageButton android:id="@+id/copyCloudflaredBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
