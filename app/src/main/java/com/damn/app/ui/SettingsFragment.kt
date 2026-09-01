@@ -1,7 +1,5 @@
 package com.damn.app.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -38,14 +36,6 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         setupCollapsibles()
         loadPrefs()
         binding.saveBtn.setOnClickListener { saveSettings() }
-        binding.copyTorAddressBtn.setOnClickListener {
-            val addr = binding.torOnionAddressText.text.toString()
-            if (addr != "Not connected") {
-                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                cm.setPrimaryClip(ClipData.newPlainText("Onion Address", addr))
-                Toast.makeText(requireContext(), "Onion address copied", Toast.LENGTH_SHORT).show()
-            }
-        }
         binding.importCfBtn.setOnClickListener { importCfLauncher.launch(arrayOf("*/*")) }
     }
 
@@ -73,7 +63,7 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
     private fun updateStatusIndicators() {
         val ctx = context ?: return
         val onion = Prefs.getOnionAddress(ctx)
-        binding.torOnionAddressText.text = if (onion.isNotEmpty()) onion else "Not connected"
+        binding.torOnionAddressText.text = if (onion.isNotEmpty()) "Tor active: $onion" else "Tor not active"
 
         val ngrokAddr = Prefs.getNgrokAddress(ctx)
         binding.ngrokStatusText.text = if (ngrokAddr.isNotEmpty()) "Ngrok active: $ngrokAddr" else "Ngrok not active"
