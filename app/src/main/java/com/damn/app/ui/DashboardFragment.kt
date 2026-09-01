@@ -151,33 +151,30 @@ class DashboardFragment : Fragment() {
         // Prepare purple overrides for firewall & NAT
         val fwRaw = nodes["firewall"] ?: return
         val natRaw = nodes["nat"] ?: return
+        val dnsN = nodes["dns"] ?: return
         val fwNode = fwRaw.copy(color = "purple", status = "online", ip = "FIREWALL", enabled = true)
         val natNode = natRaw.copy(color = "purple", status = "Active", ping = if (natRaw.ping > 0) natRaw.ping else 42, enabled = true, ip = natRaw.ip)
 
         if (!isRunning) {
-            // --- STANDBY VIEW: internet -> firewall -> nat -> you ---
-            // Top: Internet
+            // --- STANDBY VIEW: Internet -> NAT/Firewall -> DNS/YOU ---
             topRow.addView(createEndpoint(false, worldIp))
 
-            // Middle: Firewall
+            midRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = false))
+            midRow.addView(createAnimatedConnector("live", false))
             midRow.addView(createNode("firewall", "Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = false))
 
-            // Bottom: NAT -> YOU
-            bottomRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = false))
+            bottomRow.addView(createNode("dns", "DNS / Bridge", dnsN.ip, dnsN, isFirewall = false, iconType = "dns", hidePing = false, isRunning = false))
             bottomRow.addView(createAnimatedConnector("live", false))
             bottomRow.addView(createEndpoint(true, youIp))
         } else {
             // --- ACTIVE VIEW: Full Inbound Stack ---
             val hostN = nodes["host"] ?: return
             val engN = nodes["engine"] ?: return
-            val dnsN = nodes["dns"] ?: return
             val phpEnabled = Prefs.isPhpEnabled(ctx)
             val listenerEnabled = Prefs.isListenerEnabled(ctx)
 
-            // Top: INTERNET -> DNS -> TUNNELS
+            // Top: INTERNET -> TUNNELS
             topRow.addView(createEndpoint(false, worldIp))
-            topRow.addView(createAnimatedConnector("live", true))
-            topRow.addView(createNode("dns", "DNS / Bridge", dnsN.ip, dnsN, isFirewall = false, iconType = "dns", hidePing = false, isRunning = true))
 
             val tunnels = listOf("tor" to nodes["tor"], "ngrok" to nodes["ngrok"], "cf" to nodes["cf"]).filter { it.second?.enabled == true }
             tunnels.forEach { (k, n) ->
@@ -190,13 +187,15 @@ class DashboardFragment : Fragment() {
                 topRow.addView(createNode(k, label, n?.ip ?: "—", n!!, isFirewall = false, iconType = k, hidePing = false, isRunning = true))
             }
 
-            // Middle: Firewall
+            // Middle: Router (NAT) -> Firewall
+            midRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
+            midRow.addView(createAnimatedConnector("live", true))
             midRow.addView(createNode("firewall", "Firewall / Carrier NAT", "FIREWALL", fwNode, isFirewall = true, iconType = "damn", hidePing = false, isRunning = true))
 
-            // Bottom: NAT -> (PHP ENGINE OR LISTENER) -> HOST -> YOU
-            bottomRow.addView(createNode("nat", "NAT / UPNP", natNode.ip, natNode, isFirewall = false, iconType = "router", hidePing = true, isRunning = true))
+            // Bottom: DNS -> (PHP ENGINE OR LISTENER) -> HOST -> YOU
+            bottomRow.addView(createNode("dns", "DNS / Bridge", dnsN.ip, dnsN, isFirewall = false, iconType = "dns", hidePing = false, isRunning = true))
             bottomRow.addView(createAnimatedConnector("live", true))
-            
+
             if (phpEnabled) {
                 bottomRow.addView(createNode("engine", "PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "php", hidePing = false, isRunning = true))
                 bottomRow.addView(createAnimatedConnector(hostN.color, true))
@@ -207,7 +206,7 @@ class DashboardFragment : Fragment() {
                 val proxyNode = engN.copy(ip = "$proxyHost:$proxyPort")
                 bottomRow.addView(createNode("engine", "Listener", "$proxyHost:$proxyPort", proxyNode, isFirewall = false, iconType = "router", hidePing = false, isRunning = true))
             }
-            
+
             bottomRow.addView(createAnimatedConnector("live", true))
             bottomRow.addView(createEndpoint(true, youIp))
         }
@@ -242,7 +241,8 @@ class DashboardFragment : Fragment() {
         if (topRow.childCount == 0 || midRow.childCount == 0 || bottomRow.childCount == 0) return
         
         val lastTop = topRow.getChildAt(topRow.childCount - 1) ?: return
-        val fwView = midRow.getChildAt(0) ?: return
+        val midStartView = midRow.getChildAt(0) ?: return
+        val midEndView = midRow.getChildAt(midRow.childCount - 1) ?: return
         val firstBottom = bottomRow.getChildAt(0) ?: return
 
         // Robust coordinate mapping to zoomContainer space
@@ -253,17 +253,18 @@ class DashboardFragment : Fragment() {
         }
 
         val lastTopRect = getRelativeRect(lastTop, rowsCont)
-        val fwViewRect = getRelativeRect(fwView, rowsCont)
+        val midStartRect = getRelativeRect(midStartView, rowsCont)
+        val midEndRect = getRelativeRect(midEndView, rowsCont)
         val firstBottomRect = getRelativeRect(firstBottom, rowsCont)
 
         val startX = lastTopRect.right.toFloat()
         val startY = lastTopRect.centerY().toFloat()
         
-        val fwTopX = fwViewRect.centerX().toFloat()
-        val fwTopY = fwViewRect.top.toFloat()
+        val fwTopX = midStartRect.centerX().toFloat()
+        val fwTopY = midStartRect.top.toFloat()
         
-        val fwBottomX = fwTopX
-        val fwBottomY = fwViewRect.bottom.toFloat()
+        val fwBottomX = midEndRect.centerX().toFloat()
+        val fwBottomY = midEndRect.bottom.toFloat()
         
         val endX = firstBottomRect.left.toFloat()
         val endY = firstBottomRect.centerY().toFloat()
