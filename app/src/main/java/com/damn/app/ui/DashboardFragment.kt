@@ -174,12 +174,20 @@ class DashboardFragment : Fragment() {
             val phpEnabled = Prefs.isPhpEnabled(ctx)
             val listenerEnabled = Prefs.isListenerEnabled(ctx)
 
-            // Top: INTERNET -> TUNNELS
+            // Top: INTERNET -> DNS -> TUNNELS
             topRow.addView(createEndpoint(false, worldIp))
+            topRow.addView(createAnimatedConnector("live", true))
+            topRow.addView(createNode("dns", "DNS / Bridge", dnsN.ip, dnsN, isFirewall = false, iconType = "dns", hidePing = false, isRunning = true))
+
             val tunnels = listOf("tor" to nodes["tor"], "ngrok" to nodes["ngrok"], "cf" to nodes["cf"]).filter { it.second?.enabled == true }
             tunnels.forEach { (k, n) ->
                 topRow.addView(createAnimatedConnector("live", true))
-                topRow.addView(createNode(k, if (k == "tor") "Tor Onion" else k.uppercase(), n?.ip ?: "—", n!!, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+                val label = when(k) {
+                    "tor" -> "Tor Onion"
+                    "cf" -> "Cloudflare"
+                    else -> k.uppercase()
+                }
+                topRow.addView(createNode(k, label, n?.ip ?: "—", n!!, isFirewall = false, iconType = k, hidePing = false, isRunning = true))
             }
 
             // Middle: Firewall
@@ -190,7 +198,7 @@ class DashboardFragment : Fragment() {
             bottomRow.addView(createAnimatedConnector("live", true))
             
             if (phpEnabled) {
-                bottomRow.addView(createNode("engine", "PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "default", hidePing = false, isRunning = true))
+                bottomRow.addView(createNode("engine", "PHP Engine", "localhost:$port", engN, isFirewall = false, iconType = "php", hidePing = false, isRunning = true))
                 bottomRow.addView(createAnimatedConnector(hostN.color, true))
                 bottomRow.addView(createNode("host", "HOST FILES", hostN.ip.ifEmpty { hostLabel }, hostN, isFirewall = false, iconType = "phone", hidePing = false, isRunning = true))
             } else if (listenerEnabled) {
@@ -328,9 +336,14 @@ class DashboardFragment : Fragment() {
 
         // Icon selection
         val iconRes = when (iconType) {
-            "phone" -> R.drawable.ic_phone
-            "router" -> R.drawable.ic_router
-            "damn" -> R.drawable.ic_damn_logo
+            "phone" -> R.drawable.phone
+            "router" -> R.drawable.router
+            "damn" -> if (isRunning) R.drawable.firewall_glitch else R.drawable.firewall_stable
+            "tor" -> R.drawable.tor
+            "cf" -> R.drawable.cloudflare2
+            "dns" -> R.drawable.dns
+            "php" -> R.drawable.php
+            "ngrok" -> R.drawable.tunnel2
             else -> R.drawable.ic_home
         }
         val icon = ImageView(ctx).apply {
@@ -339,14 +352,16 @@ class DashboardFragment : Fragment() {
                 bottomMargin = (3 * resources.displayMetrics.density).toInt()
             }
             setImageResource(iconRes)
-            val col = when (info.color) {
-                "purple" -> Color.parseColor("#A78BFA")
-                "green" -> Color.parseColor("#22C55E")
-                "yellow" -> Color.parseColor("#F59E0B")
-                "red" -> Color.parseColor("#EF4444")
-                else -> Color.parseColor("#38BDF8")
+            if (iconType != "tor" && iconType != "cf" && iconType != "ngrok" && iconType != "damn" && iconType != "dns" && iconType != "phone" && iconType != "router" && iconType != "php") {
+                val col = when (info.color) {
+                    "purple" -> Color.parseColor("#A78BFA")
+                    "green" -> Color.parseColor("#22C55E")
+                    "yellow" -> Color.parseColor("#F59E0B")
+                    "red" -> Color.parseColor("#EF4444")
+                    else -> Color.parseColor("#38BDF8")
+                }
+                setColorFilter(col)
             }
-            setColorFilter(col)
             alpha = if (!info.enabled) 0.5f else 1f
         }
         inner.addView(icon)

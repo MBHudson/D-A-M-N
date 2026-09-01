@@ -226,7 +226,7 @@
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/ngrokSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cloudflare" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/cloudflaredSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
             </LinearLayout>
@@ -278,9 +278,9 @@
                 <ImageButton android:id="@+id/copyNgrokBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
             </LinearLayout>
 
-            <!-- CF -->
+            <!-- Cloudflare -->
             <LinearLayout android:id="@+id/cloudflaredRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="2dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF" android:textColor="#94A3B8" android:textSize="11sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cloudflare" android:textColor="#94A3B8" android:textSize="11sp" />
                 <TextView android:id="@+id/cloudflaredUrlText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:textColor="@color/damn_accent" android:textSize="11sp" android:layout_marginStart="8dp" />
                 <ImageButton android:id="@+id/copyCloudflaredBtn" android:layout_width="32dp" android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/ic_globe" app:tint="@color/damn_accent" />
             </LinearLayout>
