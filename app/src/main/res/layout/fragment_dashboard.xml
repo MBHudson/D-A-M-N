@@ -88,7 +88,7 @@
                 android:layout_marginTop="10dp"
                 android:background="#0B1220"
                 android:padding="8dp"
-                android:clipChildren="true"
+                android:clipChildren="false"
                 android:clipToPadding="false">
 
                 <HorizontalScrollView
@@ -107,14 +107,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:fillViewport="true"
-                        android:overScrollMode="never">
+                        android:overScrollMode="never"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
 
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/zoomContainer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:transformPivotX="0dp"
-                            android:transformPivotY="0dp">
+                            android:transformPivotY="0dp"
+                            android:clipChildren="false"
+                            android:clipToPadding="false">
 
                         <com.damn.app.ui.SPathView
                             android:id="@+id/sPathView"
@@ -130,6 +134,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
+                            android:paddingHorizontal="24dp"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -140,7 +147,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center_vertical"
-                                android:orientation="horizontal" />
+                                android:orientation="horizontal"
+                                android:clipChildren="false"
+                                android:clipToPadding="false" />
 
                             <LinearLayout
                                 android:id="@+id/midRow"
@@ -148,14 +157,18 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:orientation="horizontal"
-                                android:paddingVertical="6dp" />
+                                android:paddingVertical="12dp"
+                                android:clipChildren="false"
+                                android:clipToPadding="false" />
 
                             <LinearLayout
                                 android:id="@+id/bottomRow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center_vertical"
-                                android:orientation="horizontal" />
+                                android:orientation="horizontal"
+                                android:clipChildren="false"
+                                android:clipToPadding="false" />
                         </LinearLayout>
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.core.widget.NestedScrollView>

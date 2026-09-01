@@ -275,20 +275,21 @@ class DashboardFragment : Fragment() {
 
     private fun createNode(key: String, title: String, sub: String, info: DashboardMetrics.NodeInfo, isFirewall: Boolean = false, iconType: String = "default", hidePing: Boolean = false, isRunning: Boolean = true): View {
         val ctx = context ?: return View(requireContext())
-        // sizing: firewall 20% smaller than previous 88 -> 70, others 10% smaller 88->79, padding/icon/text scaled accordingly
+        // sizing: unify all nodes for consistent grid look
         val isFw = isFirewall
-        val cardWidth = if (isFw) 70 else 79
-        val cardRadius = if (isFw) 6f else 9f
-        val padDp = if (isFw) 5 else 5
-        val iconW = if (isFw) 34 else 38
-        val iconH = if (isFw) 24 else 27
+        val cardWidth = 82 // Increased slightly from 79
+        val cardHeight = 118 // Increased slightly from 115
+        val cardRadius = 10f
+        val padDp = 6
+        val iconSize = 40 // Square icon area
         val card = MaterialCardView(ctx).apply {
             radius = cardRadius * resources.displayMetrics.density
-            cardElevation = 5f
+            cardElevation = 6f
             val pad = (padDp * resources.displayMetrics.density).toInt()
             setContentPadding(pad, pad, pad, pad)
-            layoutParams = LinearLayout.LayoutParams((cardWidth * resources.displayMetrics.density).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                marginEnd = (5 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams((cardWidth * resources.displayMetrics.density).toInt(), (cardHeight * resources.displayMetrics.density).toInt()).apply {
+                marginStart = (10 * resources.displayMetrics.density).toInt() // Extra margin to prevent clipping
+                marginEnd = (10 * resources.displayMetrics.density).toInt()
             }
             strokeWidth = (2 * resources.displayMetrics.density).toInt()
             setCardBackgroundColor(Color.parseColor("#151E33"))
@@ -314,7 +315,10 @@ class DashboardFragment : Fragment() {
                 // fire distressed animation via background tint pulse - handled via animator below
             }
         }
-        val inner = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
+        val inner = LinearLayout(ctx).apply { 
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER // Center content vertically in the fixed-height card
+        }
 
         // Status dot — hide for NAT as requested (remove indicator)
         if (!hidePing) {
@@ -348,10 +352,11 @@ class DashboardFragment : Fragment() {
             else -> R.drawable.ic_home
         }
         val icon = ImageView(ctx).apply {
-            layoutParams = LinearLayout.LayoutParams((iconW * resources.displayMetrics.density).toInt(), (iconH * resources.displayMetrics.density).toInt()).apply {
+            layoutParams = LinearLayout.LayoutParams((iconSize * resources.displayMetrics.density).toInt(), (iconSize * resources.displayMetrics.density).toInt()).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
-                bottomMargin = (3 * resources.displayMetrics.density).toInt()
+                bottomMargin = (4 * resources.displayMetrics.density).toInt()
             }
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
             setImageResource(iconRes)
             if (iconType != "tor" && iconType != "cf" && iconType != "ngrok" && iconType != "damn" && iconType != "dns" && iconType != "phone" && iconType != "router" && iconType != "php") {
                 val col = when (info.color) {
@@ -432,12 +437,12 @@ class DashboardFragment : Fragment() {
         }
 
         val slot = TextView(ctx).apply {
-            text = title.uppercase(); setTextColor(Color.parseColor("#64748B")); textSize = if (isFw) 5.2f else 5.9f; letterSpacing = 0.08f; gravity = Gravity.CENTER; maxLines = 1
+            text = title.uppercase(); setTextColor(Color.parseColor("#64748B")); textSize = 6.2f; letterSpacing = 0.08f; gravity = Gravity.CENTER; maxLines = 1
         }
         inner.addView(slot)
 
         val ip = TextView(ctx).apply {
-            text = sub; setTextColor(Color.parseColor("#E6ECF5")); textSize = if (isFw) 6.4f else 7.2f; gravity = Gravity.CENTER; isSingleLine = true
+            text = sub; setTextColor(Color.parseColor("#E6ECF5")); textSize = 7.4f; gravity = Gravity.CENTER; isSingleLine = true
             typeface = Typeface.MONOSPACE
             setTypeface(typeface, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -447,7 +452,7 @@ class DashboardFragment : Fragment() {
         // Badge — darker pill, not white oval, more visible
         val badge = TextView(ctx).apply {
             text = info.status.uppercase()
-            textSize = if (isFw) 5.6f else 6.3f
+            textSize = 6.5f
             gravity = Gravity.CENTER
             letterSpacing = 0.05f
             setTypeface(null, Typeface.BOLD)
@@ -493,10 +498,10 @@ class DashboardFragment : Fragment() {
                 orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
-            pingCol.addView(TextView(ctx).apply { text = "Ping"; setTextColor(Color.parseColor("#64748B")); textSize = if (isFw) 5f else 5.4f; gravity = Gravity.CENTER })
+            pingCol.addView(TextView(ctx).apply { text = "Ping"; setTextColor(Color.parseColor("#64748B")); textSize = 5.4f; gravity = Gravity.CENTER })
             pingCol.addView(TextView(ctx).apply {
                 text = if (info.ping > 0) "${info.ping}ms" else "—"
-                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
+                textSize = 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
                 setTextColor(when (info.color) {
                     "purple" -> Color.parseColor("#A78BFA")
                     "green" -> Color.parseColor("#22C55E")
@@ -510,16 +515,16 @@ class DashboardFragment : Fragment() {
                 orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
-            extraCol.addView(TextView(ctx).apply { text = if (isFirewall) "Wall" else "Bypass"; setTextColor(Color.parseColor("#64748B")); textSize = if (isFw) 5f else 5.4f; gravity = Gravity.CENTER })
+            extraCol.addView(TextView(ctx).apply { text = if (isFirewall) "Wall" else "Bypass"; setTextColor(Color.parseColor("#64748B")); textSize = 5.4f; gravity = Gravity.CENTER })
             extraCol.addView(TextView(ctx).apply {
                 text = if (isFirewall) "ON" else (if (info.enabled) "active" else "off")
-                textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD); setTextColor(Color.parseColor("#E6ECF5"))
+                textSize = 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD); setTextColor(Color.parseColor("#E6ECF5"))
             })
             statsRow.addView(extraCol)
         } else {
             // NAT hidden ping: show only Bypass centered
             val centered = TextView(ctx).apply {
-                text = "Active"; setTextColor(Color.parseColor("#A78BFA")); textSize = if (isFw) 7.2f else 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
+                text = "Active"; setTextColor(Color.parseColor("#A78BFA")); textSize = 8.1f; gravity = Gravity.CENTER; setTypeface(null, Typeface.BOLD)
                 letterSpacing = 0.06f
             }
             statsRow.addView(centered)
