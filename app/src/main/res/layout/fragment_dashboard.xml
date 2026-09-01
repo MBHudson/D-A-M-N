@@ -24,37 +24,36 @@
             app:strokeColor="#1E293B"
             app:strokeWidth="1dp">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="13dp">
 
                 <TextView
+                    android:id="@+id/appTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:letterSpacing="0.1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <TextView
+                    android:id="@+id/appSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_subtitle_prefixed"
                     android:textColor="@color/damn_accent"
                     android:textSize="10sp"
                     android:layout_marginStart="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:alpha="0.8" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:alpha="0.8"
+                    app:layout_constraintStart_toEndOf="@id/appTitle"
+                    app:layout_constraintBaseline_toBaselineOf="@id/appTitle" />
 
                 <ImageButton
                     android:id="@+id/fullscreenBtn"
@@ -65,8 +64,11 @@
                     app:tint="@color/damn_accent"
                     android:padding="6dp"
                     android:scaleType="centerInside"
-                    android:contentDescription="Toggle Fullscreen" />
-            </LinearLayout>
+                    android:contentDescription="Toggle Fullscreen"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Live Routing Path — S layout — directly after banner (stats section removed) -->
