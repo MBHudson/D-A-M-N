@@ -1,0 +1,24 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <!-- Themed to DAMN: bg 0B1220, card 151E33, accent 38BDF8, success 22C55E, warn F59E0B -->
+    <!-- Left folder (was yellow) -> accent gold themed -->
+    <path android:fillColor="#F59E0B" android:pathData="M8,18 L32,18 L32,38 L8,38 Z M8,18 L12,14 L18,14 L24,18 L32,18 L32,20 L8,20 Z"/>
+    <path android:fillColor="#0B1220" android:pathData="M20,48 h6 v6 h-6z" android:strokeColor="#334155" android:strokeWidth="1"/>
+    <path android:fillColor="#64748B" android:pathData="M12,58 L36,58 L36,62 L12,62 Z"/>
+    <!-- Center green folder -->
+    <path android:fillColor="#22C55E" android:pathData="M38,48 L72,48 L72,72 L38,72 Z M38,48 L42,44 L58,44 L64,48 L72,48 L72,52 L38,52 Z"/>
+    <path android:fillColor="#0B1220" android:pathData="M50,78 h6 v6 h-6z"/>
+    <path android:fillColor="#64748B" android:pathData="M42,88 L68,88 L68,92 L42,92 Z"/>
+    <!-- Right folder (was blue) -> accent -->
+    <path android:fillColor="#38BDF8" android:pathData="M76,18 L98,18 L98,38 L76,38 Z M76,18 L80,14 L86,14 L90,18 L98,18 L98,20 L76,20 Z"/>
+    <path android:fillColor="#0B1220" android:pathData="M86,48 h6 v6 h-6z"/>
+    <path android:fillColor="#64748B" android:pathData="M78,58 L98,58 L98,62 L78,62 Z"/>
+    <!-- Dots -->
+    <path android:fillColor="#F59E0B" android:pathData="M20,66 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0"/>
+    <path android:fillColor="#38BDF8" android:pathData="M80,66 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0"/>
+    <path android:fillColor="#22C55E" android:pathData="M48,96 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0"/>
+    <!-- Connection bars (was grey) -->
+    <path android:fillColor="#334155" android:pathData="M36,26 h12 v8 h-12z"/>
+    <path android:fillColor="#475569" android:pathData="M36,26 h6 v8 h-6z"/>
+</vector>

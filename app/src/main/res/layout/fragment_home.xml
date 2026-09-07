@@ -230,20 +230,68 @@
 
             <!-- Switches Group -->
             <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NAT" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                <LinearLayout android:layout_width="58dp" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="14dp"
+                        android:text="NAT"
+                        android:textColor="@color/white"
+                        android:textSize="9dp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:lines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="5dp"
+                        app:autoSizeMaxTextSize="9dp"
+                        app:autoSizeStepGranularity="0.5dp" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/natSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tor" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                <LinearLayout android:layout_width="58dp" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="14dp"
+                        android:text="Tor"
+                        android:textColor="@color/white"
+                        android:textSize="9dp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:lines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="5dp"
+                        app:autoSizeMaxTextSize="9dp"
+                        app:autoSizeStepGranularity="0.5dp" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/torSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ngrok" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                <LinearLayout android:layout_width="58dp" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="14dp"
+                        android:text="Ngrok"
+                        android:textColor="@color/white"
+                        android:textSize="9dp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:lines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="5dp"
+                        app:autoSizeMaxTextSize="9dp"
+                        app:autoSizeStepGranularity="0.5dp" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/ngrokSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cloudflare" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                <LinearLayout android:layout_width="58dp" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="14dp"
+                        android:text="Cloudflare"
+                        android:textColor="@color/white"
+                        android:textSize="9dp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:lines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="5dp"
+                        app:autoSizeMaxTextSize="9dp"
+                        app:autoSizeStepGranularity="0.5dp" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/cloudflaredSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                 </LinearLayout>
             </LinearLayout>
