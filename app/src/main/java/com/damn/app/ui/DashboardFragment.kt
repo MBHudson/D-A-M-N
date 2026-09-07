@@ -99,7 +99,10 @@ class DashboardFragment : Fragment() {
         if (isFullscreen) {
             controller.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-        } else controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        } else {
+            controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        }
+        (requireActivity() as? com.damn.app.MainActivity)?.setNavVisibility(!isFullscreen)
     }
 
     private fun showHelpDialog() {

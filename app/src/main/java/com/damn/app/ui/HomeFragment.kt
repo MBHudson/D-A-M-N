@@ -325,7 +325,10 @@ class HomeFragment : Fragment() {
         if (isFullscreen) {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
-        } else controller.show(WindowInsetsCompat.Type.systemBars())
+        } else {
+            controller.show(WindowInsetsCompat.Type.systemBars())
+        }
+        (requireActivity() as? com.damn.app.MainActivity)?.setNavVisibility(!isFullscreen)
     }
 
     private fun showHelpDialog() {

@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -28,8 +29,8 @@ android {
         applicationId = "com.damn.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 20
-        versionName = "20.0.0"
+        versionCode = 22
+        versionName = "v22"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +58,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        compose = true
     }
     packaging {
         resources {
@@ -80,6 +82,12 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("com.airbnb.android:lottie:6.1.0")
+    implementation("androidx.compose.ui:ui:1.12.0")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.compose.material:material-icons-core:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.12.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.12.0")
     implementation("info.guardianproject.netcipher:netcipher:2.1.0")
     implementation("info.guardianproject:jtorctl:0.4.5.7")
     implementation("info.guardianproject:tor-android:0.4.9.11")
