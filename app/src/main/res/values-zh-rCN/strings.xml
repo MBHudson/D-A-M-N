@@ -48,7 +48,7 @@
     <string name="privacy_policy">隐私政策</string>
     <string name="advanced_experimental">高级 (实验性)</string>
     <string name="experimental_warning">你想让应用崩溃吗？这就是让应用崩溃的方法。</string>
-    <string name="terminal_welcome">-点击地球图标在浏览器中打开\n-长按地址进行复制\n-点击仪表板节点进行 Ping 测试\n\n\n\nD·A·M·N 就绪。</string>
+    <string name="terminal_welcome">D·A·M·N 就绪。</string>
     <string name="help_desc">显示帮助</string>
     <string name="help_title">D·A·M·N 用户指南</string>
     <string name="help_content">欢迎使用 **D·A·M·N (Drop Any Media Now)**，您的匿名、直接托管指挥中心。\n\n🚀 **入门指南**\n\n1. **选择内容**：在“主页”标签页中使用**文件**或**文件夹**按钮。访问者将看到文件夹共享的专业文件浏览器。**专业提示**：如果您的文件夹包含 `index.html` 或 `index.php` 文件，它将作为**实时网站**提供服务！\n2. **启动服务器**：点击大**启动**按钮。您的设备现在是一台实时的 Web 服务器！\n\n💻 **实时终端与操作指令**\n\n主页底部的终端是**真正的实时控制台**。它直接从服务器引擎提供实时日志和错误报告。请使用以下快捷操作：\n• **点击地球图标**：直接在浏览器中打开 URL。\n• **长按地址**：将任何 URL 或日志行立即复制到剪贴板。\n• **点击仪表板节点**：手动对任何组件进行 Ping 测试以检查其运行状况。\n\n🌐 **连接方式**\n\n• **本地 URL**：与同一 Wi-Fi 网络中的设备进行最快分享。\n• **公网 URL (NAT/UPnP)**：尝试在您的家庭路由器上开启端口以实现直接 IP 访问（需要在路由器上启用 UPnP）。\n• **Tor (.onion)**：隐私的黄金标准。完全匿名，几乎可以穿透任何防火墙，但速度较慢。\n• **Ngrok &amp; Cloudflare**：高速隧道。Cloudflare 支持“快速隧道”（无需账号）。**Ngrok** 需要**授权令牌**以保证稳定性——请访问 **https://dashboard.ngrok.com/get-started/your-authtoken** 免费获取您的令牌。\n\n📊 **仪表板**\n\n• **路由图**：流量进入的视觉地图。点击图表中的任何节点即可触发该组件的手动运行状态检查！\n• **实时流量**：实时的输入 (IN) 和输出 (OUT) 速度 (KB/s)。\n• **Ping 历史**：所有连接的 60 秒延迟图表。\n\n📱 **导航与手势**\n\n• **滑动导航**：在屏幕任意位置向左或向右滑动，即可在**主页**、**仪表板**和**设置**之间平滑切换。\n• **全屏**：点击 `[ ]` 图标以最大化您的工作空间。\n\n⚙️ **高级设置**\n\n• **断开时关闭**：在闲置 1 分钟后自动停止服务器。\n• **声音警报**：如果连接中断，手机将每 2 秒鸣叫一次。\n• **密码保护**：通过登录页面锁定您的文件。</string>
