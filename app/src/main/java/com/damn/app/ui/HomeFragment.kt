@@ -120,6 +120,7 @@ class HomeFragment : Fragment() {
         binding.copyCloudflaredBtn.setOnClickListener { openInBrowser(binding.cloudflaredUrlText.text.toString()) }
         // settingsBtn removed per spec — navigation now via bottom bar
         binding.fullscreenBtn.setOnClickListener { toggleFullscreen() }
+        binding.helpBtn.setOnClickListener { showHelpDialog() }
 
 
         binding.portInput.setOnFocusChangeListener { _, hasFocus ->
@@ -325,6 +326,18 @@ class HomeFragment : Fragment() {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
         } else controller.show(WindowInsetsCompat.Type.systemBars())
+    }
+
+    private fun showHelpDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_help, null)
+        val textView = dialogView.findViewById<android.widget.TextView>(R.id.helpTextView)
+        textView.text = getString(R.string.help_content)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_DAMN_Dialog)
+            .setTitle(R.string.help_title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.help_close, null)
+            .show()
     }
 
     private fun appendLog(msg: String) {

@@ -50,6 +50,7 @@ class DashboardFragment : Fragment() {
         binding.speedBtn.setOnClickListener { runSpeedTest() }
         binding.zoomInBtn.setOnClickListener { changeZoom(0.1f) }
         binding.zoomOutBtn.setOnClickListener { changeZoom(-0.1f) }
+        binding.helpBtn.setOnClickListener { showHelpDialog() }
 
         if (ServerService.instance?.isRunning() == true) {
             DashboardMetrics.start(requireContext().applicationContext)
@@ -99,6 +100,18 @@ class DashboardFragment : Fragment() {
             controller.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
         } else controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+    }
+
+    private fun showHelpDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_help, null)
+        val textView = dialogView.findViewById<android.widget.TextView>(R.id.helpTextView)
+        textView.text = getString(R.string.help_content)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_DAMN_Dialog)
+            .setTitle(R.string.help_title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.help_close, null)
+            .show()
     }
 
     private fun observeMetrics() {

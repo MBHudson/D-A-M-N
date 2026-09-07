@@ -28,8 +28,8 @@ android {
         applicationId = "com.damn.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 18
-        versionName = "18.0.0"
+        versionCode = 20
+        versionName = "20.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,6 +41,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

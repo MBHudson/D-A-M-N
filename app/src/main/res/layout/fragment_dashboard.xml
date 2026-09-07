@@ -56,6 +56,21 @@
                     app:layout_constraintBaseline_toBaselineOf="@id/appTitle" />
 
                 <ImageButton
+                    android:id="@+id/helpBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_help"
+                    app:tint="@color/damn_accent"
+                    android:padding="6dp"
+                    android:scaleType="centerInside"
+                    android:contentDescription="@string/help_desc"
+                    app:layout_constraintEnd_toStartOf="@id/fullscreenBtn"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <ImageButton
                     android:id="@+id/fullscreenBtn"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
