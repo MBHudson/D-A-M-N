@@ -229,7 +229,8 @@ class ServerService : Service() {
                 }
 
                 val pass = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getPassword(this@ServerService) else null
-                val srv = PhpFileServer(currentVfs, port, engine, pass, cacheDir, {
+                val user = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getUsername(this@ServerService) else null
+                val srv = PhpFileServer(currentVfs, port, engine, user, pass, cacheDir, {
                     lastActivityTime = System.currentTimeMillis()
                 }) { msg -> log(msg) }
                 try {

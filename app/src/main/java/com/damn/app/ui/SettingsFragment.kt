@@ -160,6 +160,7 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
             else -> binding.themeDark.isChecked = true
         }
         binding.passwordSwitch.isChecked = Prefs.isPasswordEnabled(ctx)
+        binding.usernameInput.setText(Prefs.getUsername(ctx))
         binding.passwordInput.setText(Prefs.getPassword(ctx))
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(ctx)
         binding.portraitSwitch.isChecked = Prefs.isForcePortrait(ctx)
@@ -209,6 +210,7 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         }
         Prefs.setTheme(ctx, selectedTheme)
         Prefs.setPasswordEnabled(ctx, binding.passwordSwitch.isChecked)
+        Prefs.setUsername(ctx, binding.usernameInput.text.toString())
         Prefs.setPassword(ctx, binding.passwordInput.text.toString())
         Prefs.setShutdownOnDisconnect(ctx, binding.shutdownSwitch.isChecked)
         Prefs.setForcePortrait(ctx, binding.portraitSwitch.isChecked)

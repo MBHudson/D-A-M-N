@@ -13,6 +13,7 @@ object Prefs {
     private const val KEY_WAS_RUNNING = "was_running"
     private const val KEY_THEME = "theme"
     private const val KEY_PASS_ENABLED = "pass_enabled"
+    private const val KEY_USER_VALUE = "user_value"
     private const val KEY_PASS_VALUE = "pass_value"
     private const val KEY_SHUTDOWN_DISCONNECT = "shutdown_disconnect"
     private const val KEY_TOR_ENABLED = "tor_enabled"
@@ -84,6 +85,9 @@ object Prefs {
 
     fun isPasswordEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_PASS_ENABLED, false)
     fun setPasswordEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_PASS_ENABLED, v).apply() }
+
+    fun getUsername(ctx: Context): String = prefs(ctx).getString(KEY_USER_VALUE, "") ?: ""
+    fun setUsername(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_USER_VALUE, v).apply() }
 
     fun getPassword(ctx: Context): String = prefs(ctx).getString(KEY_PASS_VALUE, "") ?: ""
     fun setPassword(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_PASS_VALUE, v).apply() }

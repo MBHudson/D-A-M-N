@@ -246,7 +246,7 @@
                         <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/ngrokSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginStart="-4dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cloudflare" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CF" android:textColor="@color/white" android:textSize="9sp" android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/cloudflaredSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="0.65" android:scaleY="0.65" />
                     </LinearLayout>
                 </LinearLayout>

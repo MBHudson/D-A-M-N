@@ -1,6 +1,7 @@
 package com.damn.app
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -22,13 +23,11 @@ class MainActivity : AppCompatActivity() {
         // Edge-to-edge
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Launch in fullscreen by default
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        controller.hide(WindowInsetsCompat.Type.systemBars())
-        setNavVisibility(false)
-
         val isTablet = resources.getBoolean(R.bool.isTablet)
+        binding.bottomNav.visibility = if (isTablet) View.GONE else View.VISIBLE
+        binding.navRail.visibility = if (isTablet) View.VISIBLE else View.GONE
+
+        // ViewPager2 Setup
         binding.bottomNav.visibility = if (isTablet) android.view.View.GONE else android.view.View.VISIBLE
         binding.navRail.visibility = if (isTablet) android.view.View.VISIBLE else android.view.View.GONE
 
@@ -64,6 +63,17 @@ class MainActivity : AppCompatActivity() {
             binding.navRail.setPadding(0, sys.top, 0, sys.bottom)
             insets
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure fullscreen on every resume
+        binding.root.postDelayed({
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            setNavVisibility(false)
+        }, 300)
     }
 
     fun setNavVisibility(visible: Boolean) {

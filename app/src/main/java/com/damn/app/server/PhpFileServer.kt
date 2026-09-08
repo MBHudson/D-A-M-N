@@ -27,6 +27,7 @@ class PhpFileServer(
     private val vfs: DamnVfs,
     private val port: Int,
     private val phpEngine: PhpEngine = SimplePhpEngine(),
+    private val username: String? = null,
     private val password: String? = null,
     private val cacheDir: File? = null,
     private val onActivity: () -> Unit = {},
@@ -141,7 +142,8 @@ class PhpFileServer(
                         return
                     }
                     val credentials = String(android.util.Base64.decode(authHeader.substringAfter("Basic ").trim(), android.util.Base64.NO_WRAP))
-                    if ((if (credentials.contains(":")) credentials.substringAfter(":") else credentials) != password) {
+                    val expected = (username ?: "") + ":" + password
+                    if (credentials != expected) {
                         sendUnauthorized(out)
                         logReq(401)
                         return
