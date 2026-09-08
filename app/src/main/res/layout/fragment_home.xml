@@ -137,7 +137,7 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/logsCard"
             android:layout_width="match_parent"
-            android:layout_height="361dp"
+            android:layout_height="350dp"
             android:layout_marginTop="4dp"
             app:cardCornerRadius="14dp"
             app:cardBackgroundColor="@color/damn_card"
