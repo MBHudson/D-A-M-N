@@ -33,9 +33,11 @@ import com.damn.app.util.NativeUtils
 import com.damn.app.util.Prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -98,6 +100,7 @@ class ServerService : Service() {
     private var ngrokManager: NgrokManager? = null
     private var cloudflaredManager: CloudflaredManager? = null
     private var isServiceActive = false
+    private var watchdogJob: Job? = null
     private var multicastLock: WifiManager.MulticastLock? = null
 
     fun setLogListener(l: (String) -> Unit) { logListener = l; logs.forEach { l(it) } }
@@ -260,6 +263,24 @@ class ServerService : Service() {
             
             Prefs.setWasRunning(this@ServerService, true)
             lastActivityTime = System.currentTimeMillis()
+
+            // Start Shutdown On Disconnect Watchdog if enabled
+            watchdogJob?.cancel()
+            watchdogJob = scope.launch {
+                while (isActive && isServiceActive) {
+                    delay(30000) // check every 30s
+                    if (Prefs.isShutdownOnDisconnect(this@ServerService)) {
+                        val elapsed = System.currentTimeMillis() - lastActivityTime
+                        if (elapsed > 60000) {
+                            log("Shutdown On Disconnect: No activity for >1 min. Stopping server...")
+                            stopServerInternal()
+                            stopSelf()
+                            break
+                        }
+                    }
+                }
+            }
+
             try { DashboardMetrics.start(this@ServerService) } catch (_: Exception) {}
 
             log("http://${FileUtils.getLocalIp(this@ServerService)}:$port  (local)")
@@ -398,6 +419,7 @@ class ServerService : Service() {
         server?.stop(); server = null
         forwarder?.stop(); forwarder = null
         isServiceActive = false
+        watchdogJob?.cancel(); watchdogJob = null
         Prefs.setWasRunning(this, false)
         try { DashboardMetrics.stop() } catch (_: Exception) {}
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Exception) {}
@@ -413,13 +435,15 @@ class ServerService : Service() {
     }
 
     private fun log(msg: String) {
-        // Filter out noisy warnings/errors per user request
-        if (msg.contains("[warn] No lists of TLS groups were supported", ignoreCase = true)) return
-        if (msg.contains("Thank you for trying Cloudflare Tunnel", ignoreCase = true)) return
-        if (msg.contains("is giving Tor only an IP address", ignoreCase = true)) return
-        if (msg.contains("NAT failed: No UPnP IGD found", ignoreCase = true)) return
-        if (msg.contains("NAT: discovering", ignoreCase = true)) return
-        if (msg.contains("NAT failed: sendto failed", ignoreCase = true)) return
+        if (!Prefs.isVerboseEnabled(this)) {
+            // Filter out noisy warnings/errors per user request
+            if (msg.contains("[warn] No lists of TLS groups were supported", ignoreCase = true)) return
+            if (msg.contains("Thank you for trying Cloudflare Tunnel", ignoreCase = true)) return
+            if (msg.contains("is giving Tor only an IP address", ignoreCase = true)) return
+            if (msg.contains("NAT failed: No UPnP IGD found", ignoreCase = true)) return
+            if (msg.contains("NAT: discovering", ignoreCase = true)) return
+            if (msg.contains("NAT failed: sendto failed", ignoreCase = true)) return
+        }
 
         Log.i(TAG, msg)
         logs.add(msg)

@@ -30,6 +30,7 @@ object Prefs {
     private const val KEY_FORCE_PORTRAIT = "force_portrait"
     private const val KEY_CUSTOM_DNS = "custom_dns"
     private const val KEY_SOUND_ALERTS = "sound_alerts"
+    private const val KEY_VERBOSE_LOGS = "verbose_logs"
     private const val KEY_PHP_ENABLED = "php_enabled"
     private const val KEY_LISTENER_ENABLED = "listener_enabled"
     private const val KEY_PROXY_HOST = "proxy_host"
@@ -136,6 +137,9 @@ object Prefs {
 
     fun isSoundAlertsEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_SOUND_ALERTS, false)
     fun setSoundAlertsEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_SOUND_ALERTS, v).apply() }
+
+    fun isVerboseEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_VERBOSE_LOGS, false)
+    fun setVerboseEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_VERBOSE_LOGS, v).apply() }
 
     fun isPhpEnabled(ctx: Context): Boolean = prefs(ctx).getBoolean(KEY_PHP_ENABLED, true)
     fun setPhpEnabled(ctx: Context, v: Boolean) { prefs(ctx).edit().putBoolean(KEY_PHP_ENABLED, v).apply() }

@@ -165,6 +165,7 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         binding.shutdownSwitch.isChecked = Prefs.isShutdownOnDisconnect(ctx)
         binding.portraitSwitch.isChecked = Prefs.isForcePortrait(ctx)
         binding.soundSwitch.isChecked = Prefs.isSoundAlertsEnabled(ctx)
+        binding.verboseSwitch.isChecked = Prefs.isVerboseEnabled(ctx)
         binding.dnsInput.setText(Prefs.getCustomDns(ctx))
 
         // Advanced
@@ -217,6 +218,7 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         Prefs.setShutdownOnDisconnect(ctx, binding.shutdownSwitch.isChecked)
         Prefs.setForcePortrait(ctx, binding.portraitSwitch.isChecked)
         Prefs.setSoundAlertsEnabled(ctx, binding.soundSwitch.isChecked)
+        Prefs.setVerboseEnabled(ctx, binding.verboseSwitch.isChecked)
         Prefs.setCustomDns(ctx, binding.dnsInput.text.toString())
 
         // Advanced
