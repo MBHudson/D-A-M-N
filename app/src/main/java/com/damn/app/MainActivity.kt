@@ -3,6 +3,8 @@ package com.damn.app
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.damn.app.databinding.ActivityMainBinding
 import com.damn.app.util.Prefs
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -19,6 +21,12 @@ class MainActivity : AppCompatActivity() {
 
         // Edge-to-edge
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Launch in fullscreen by default
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        setNavVisibility(false)
 
         val isTablet = resources.getBoolean(R.bool.isTablet)
         binding.bottomNav.visibility = if (isTablet) android.view.View.GONE else android.view.View.VISIBLE

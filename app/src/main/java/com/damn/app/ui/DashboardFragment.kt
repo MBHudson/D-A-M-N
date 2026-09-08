@@ -33,7 +33,7 @@ class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
-    private var isFullscreen = false
+    private var isFullscreen = true
     private var toneGen: ToneGenerator? = null
     private var beepJob: Job? = null
 

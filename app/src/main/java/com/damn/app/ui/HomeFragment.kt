@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
 
     private var boundService: ServerService? = null
     private var isBound = false
-    private var isFullscreen = false
+    private var isFullscreen = true
 
     private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) handlePickedUri(uri, isFile = true)
