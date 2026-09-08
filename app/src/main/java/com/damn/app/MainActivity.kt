@@ -76,13 +76,16 @@ class MainActivity : AppCompatActivity() {
         } else {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
-        // Ensure fullscreen on every resume
-        binding.root.postDelayed({
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
             val controller = WindowCompat.getInsetsController(window, window.decorView)
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
             setNavVisibility(false)
-        }, 300)
+        }
     }
 
     fun setNavVisibility(visible: Boolean) {
