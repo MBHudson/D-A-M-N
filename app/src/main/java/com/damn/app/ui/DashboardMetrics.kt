@@ -47,8 +47,15 @@ object DashboardMetrics {
     private val _zoomOutEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val zoomOutEvent: SharedFlow<Unit> = _zoomOutEvent
 
+    private val _zoomInEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val zoomInEvent: SharedFlow<Unit> = _zoomInEvent
+
     fun requestAutoZoomOut() {
         _zoomOutEvent.tryEmit(Unit)
+    }
+
+    fun requestAutoZoomIn() {
+        _zoomInEvent.tryEmit(Unit)
     }
 
     private val _speedDown = MutableStateFlow("—")

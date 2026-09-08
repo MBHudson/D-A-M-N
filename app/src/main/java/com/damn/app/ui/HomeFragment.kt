@@ -219,6 +219,7 @@ class HomeFragment : Fragment() {
 
     private fun doStop() {
         ServerService.stop(requireContext())
+        DashboardMetrics.requestAutoZoomIn()
         appendLog("stopping server...")
         binding.root.postDelayed({ refreshUi() }, 500)
     }

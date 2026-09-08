@@ -145,6 +145,14 @@ class DashboardFragment : Fragment() {
                         }
                     }
                 }
+                launch {
+                    DashboardMetrics.zoomInEvent.collect {
+                        repeat(3) {
+                            changeZoom(0.1f)
+                            delay(250)
+                        }
+                    }
+                }
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
