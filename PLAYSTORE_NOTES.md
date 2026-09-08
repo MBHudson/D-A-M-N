@@ -1,8 +1,8 @@
-﻿# NewRelease v26.0.0 – Play Store
+﻿# NewRelease v27.0.0 – Play Store
 
 This folder is a clean copy of videochat (without web/ and without old APKs).
 
-Version: code 26 / name v26 (app/build.gradle.kts:31-32)
+Version: code 27 / name v27 (app/build.gradle.kts:31-32)
 Included APK/AAB are DEBUG-signed (signingConfig = debug). 
 For Play Store update you MUST sign with your EXISTING release keystore:
 
