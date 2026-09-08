@@ -6,7 +6,9 @@ import com.damn.app.service.ServerService
 import com.damn.app.util.FileUtils
 import com.damn.app.util.Prefs
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
@@ -41,6 +43,13 @@ object DashboardMetrics {
 
     private val _isRunningFlow = MutableStateFlow(false)
     val isRunningFlow: StateFlow<Boolean> = _isRunningFlow
+
+    private val _zoomOutEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val zoomOutEvent: SharedFlow<Unit> = _zoomOutEvent
+
+    fun requestAutoZoomOut() {
+        _zoomOutEvent.tryEmit(Unit)
+    }
 
     private val _speedDown = MutableStateFlow("—")
     val speedDown: StateFlow<String> = _speedDown

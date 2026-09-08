@@ -205,7 +205,10 @@ class HomeFragment : Fragment() {
         val port = Prefs.getPort(ctx)
         val nat = Prefs.isNatEnabled(ctx)
         ServerService.start(ctx, port, nat)
-        try { DashboardMetrics.start(ctx.applicationContext) } catch (_: Exception) {}
+        try { 
+            DashboardMetrics.start(ctx.applicationContext)
+            DashboardMetrics.requestAutoZoomOut()
+        } catch (_: Exception) {}
         binding.root.postDelayed({
             try { ctx.bindService(Intent(ctx, ServerService::class.java), svcConn, Context.BIND_AUTO_CREATE) } catch (_: Exception) {}
             refreshUi()

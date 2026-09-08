@@ -137,6 +137,14 @@ class DashboardFragment : Fragment() {
                 launch { DashboardMetrics.speedProgress.collect { (d,u) ->
                     if (_binding != null) { binding.downBar.progress = d; binding.upBar.progress = u }
                 } }
+                launch {
+                    DashboardMetrics.zoomOutEvent.collect {
+                        repeat(3) {
+                            changeZoom(-0.1f)
+                            delay(250)
+                        }
+                    }
+                }
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
