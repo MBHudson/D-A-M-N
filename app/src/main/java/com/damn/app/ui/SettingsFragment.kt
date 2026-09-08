@@ -171,7 +171,9 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         binding.phpSwitch.isChecked = Prefs.isPhpEnabled(ctx)
         binding.listenerSwitch.isChecked = Prefs.isListenerEnabled(ctx)
         binding.proxyHostInput.setText(Prefs.getProxyHost(ctx))
-        binding.proxyPortInput.setText(Prefs.getProxyPort(ctx).toString())
+        val pp = Prefs.getProxyPort(ctx)
+        if (pp > 0) binding.proxyPortInput.setText(pp.toString())
+        else binding.proxyPortInput.setText("")
 
         binding.torLocalPortInput.setText(Prefs.getTorLocalPort(ctx).toString())
         binding.torOnionPortInput.setText(Prefs.getOnionPort(ctx).toString())
@@ -221,7 +223,8 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         Prefs.setPhpEnabled(ctx, binding.phpSwitch.isChecked)
         Prefs.setListenerEnabled(ctx, binding.listenerSwitch.isChecked)
         Prefs.setProxyHost(ctx, binding.proxyHostInput.text.toString())
-        Prefs.setProxyPort(ctx, binding.proxyPortInput.text.toString().toIntOrNull() ?: 8080)
+        val ppStr = binding.proxyPortInput.text.toString()
+        Prefs.setProxyPort(ctx, if (ppStr.isBlank()) 0 else ppStr.toIntOrNull() ?: 0)
 
         val tPort = binding.torLocalPortInput.text.toString().toIntOrNull() ?: Prefs.getPort(ctx)
         Prefs.setTorLocalPort(ctx, tPort)

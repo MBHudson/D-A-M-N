@@ -146,7 +146,7 @@ object Prefs {
     fun getProxyHost(ctx: Context): String = prefs(ctx).getString(KEY_PROXY_HOST, "") ?: ""
     fun setProxyHost(ctx: Context, v: String) { prefs(ctx).edit().putString(KEY_PROXY_HOST, v.trim()).apply() }
 
-    fun getProxyPort(ctx: Context): Int = prefs(ctx).getInt(KEY_PROXY_PORT, 8080)
+    fun getProxyPort(ctx: Context): Int = prefs(ctx).getInt(KEY_PROXY_PORT, 0)
     fun setProxyPort(ctx: Context, v: Int) { prefs(ctx).edit().putInt(KEY_PROXY_PORT, v).apply() }
 
     fun getTorLocalPort(ctx: Context): Int = prefs(ctx).getInt(KEY_TOR_LOCAL_PORT, getPort(ctx))
