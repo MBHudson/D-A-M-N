@@ -99,6 +99,8 @@ class PhpFileServer(
                 val decodedPath = URLDecoder.decode(rawPath, "UTF-8")
                 val logReq = { code: Int -> log("$code $method $decodedPath") }
                 
+                onActivity()
+
                 var authHeader: String? = null
                 var contentLength = 0
                 while (true) {
@@ -274,7 +276,16 @@ class PhpFileServer(
         if (forceDownload) writer.write("Content-Disposition: attachment; filename=\"${node.name}\"\r\n")
         writer.write("Accept-Ranges: bytes\r\nConnection: close\r\nServer: DAMN-PHP/3.0\r\nDate: ${httpDate()}\r\n\r\n")
         writer.flush()
-        if (!headOnly) vfs.openStream(node.path)?.use { it.copyTo(out) }
+        if (!headOnly) {
+            vfs.openStream(node.path)?.use { input ->
+                val buf = ByteArray(32768)
+                var n: Int
+                while (input.read(buf).also { n = it } != -1) {
+                    onActivity()
+                    out.write(buf, 0, n)
+                }
+            }
+        }
         out.flush()
     }
 

@@ -12,6 +12,7 @@ class TcpForwarder(
     private val localPort: Int,
     private val targetHost: String,
     private val targetPort: Int,
+    private val onActivity: () -> Unit = {},
     private val onLog: (String) -> Unit = {}
 ) {
     private var serverSocket: ServerSocket? = null
@@ -51,6 +52,7 @@ class TcpForwarder(
     }
 
     private fun handleClient(clientSocket: Socket) {
+        onActivity()
         pool.execute {
             try {
                 val targetSocket = Socket(targetHost, targetPort)
@@ -74,6 +76,7 @@ class TcpForwarder(
             val buf = ByteArray(16384)
             var n: Int
             while (input.read(buf).also { n = it } != -1) {
+                onActivity()
                 output.write(buf, 0, n)
                 output.flush()
             }

@@ -40,6 +40,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 
 class ServerService : Service() {
 
@@ -93,7 +94,7 @@ class ServerService : Service() {
     private var vfs: DamnVfs? = null
     private var externalIp: String? = null
     private var externalIpV6: String? = null
-    private var lastActivityTime: Long = System.currentTimeMillis()
+    private val lastActivityTime = AtomicLong(System.currentTimeMillis())
     private val logs = mutableListOf<String>()
     private var logListener: ((String) -> Unit)? = null
     private var torManager: TorManager? = null
@@ -216,6 +217,10 @@ class ServerService : Service() {
             
             vfs = currentVfs
 
+            val activityCallback = {
+                lastActivityTime.set(System.currentTimeMillis())
+            }
+
             if (Prefs.isPhpEnabled(this@ServerService) && currentVfs != null) {
                 log("Starting PHP Server for $label ...")
                 val phpBin = listOf(
@@ -233,9 +238,7 @@ class ServerService : Service() {
 
                 val pass = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getPassword(this@ServerService) else null
                 val user = if (Prefs.isPasswordEnabled(this@ServerService)) Prefs.getUsername(this@ServerService) else null
-                val srv = PhpFileServer(currentVfs, port, engine, user, pass, cacheDir, {
-                    lastActivityTime = System.currentTimeMillis()
-                }) { msg -> log(msg) }
+                val srv = PhpFileServer(currentVfs, port, engine, user, pass, cacheDir, activityCallback) { msg -> log(msg) }
                 try {
                     srv.start()
                     server = srv
@@ -248,7 +251,7 @@ class ServerService : Service() {
                 val proxyHost = Prefs.getProxyHost(this@ServerService).ifEmpty { "127.0.0.1" }
                 val proxyPort = Prefs.getProxyPort(this@ServerService)
                 log("Starting Listener: $port -> $proxyHost:$proxyPort")
-                val fwd = TcpForwarder(port, proxyHost, proxyPort) { msg -> log(msg) }
+                val fwd = TcpForwarder(port, proxyHost, proxyPort, activityCallback) { msg -> log(msg) }
                 try {
                     fwd.start()
                     forwarder = fwd
@@ -262,7 +265,7 @@ class ServerService : Service() {
             }
             
             Prefs.setWasRunning(this@ServerService, true)
-            lastActivityTime = System.currentTimeMillis()
+            lastActivityTime.set(System.currentTimeMillis())
 
             // Start Shutdown On Disconnect Watchdog if enabled
             watchdogJob?.cancel()
@@ -270,7 +273,7 @@ class ServerService : Service() {
                 while (isActive && isServiceActive) {
                     delay(30000) // check every 30s
                     if (Prefs.isShutdownOnDisconnect(this@ServerService)) {
-                        val elapsed = System.currentTimeMillis() - lastActivityTime
+                        val elapsed = System.currentTimeMillis() - lastActivityTime.get()
                         if (elapsed > 60000) {
                             log("Shutdown On Disconnect: No activity for >1 min. Stopping server...")
                             stopServerInternal()
