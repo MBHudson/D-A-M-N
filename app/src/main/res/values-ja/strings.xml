@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">プライバシーポリシー</string>
     <string name="advanced_experimental">高度な設定 (実験的)</string>
-    <string name="experimental_warning">アプリをクラッシュさせたいですか？これはアプリをクラッシュさせる方法です。</string>
+    <string name="experimental_warning">アプリをクラッシュさせたいですか？これはアプリをクラッシュさせる方法です。PHPサーバーとリスナーは同時に実行できません。どちらか一方、またはどちらも実行しないようにしてください。</string>
     <string name="terminal_welcome">D·A·M·N 準備完了。</string>
     <string name="help_desc">ヘルプを表示</string>
     <string name="help_title">D·A·M·N ユーザーガイド</string>

@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">Política de Privacidade</string>
     <string name="advanced_experimental">Avançado (Experimental)</string>
-    <string name="experimental_warning">Você quer travar o aplicativo? Porque é assim que você trava o aplicativo.</string>
+    <string name="experimental_warning">Você quer travar o aplicativo? Porque é assim que você trava o aplicativo! O Servidor PHP e o Listener não podem ser executados ao mesmo tempo. Um ou nenhum, mas não ambos!</string>
     <string name="terminal_welcome">D·A·M·N pronto.</string>
     <string name="help_desc">Mostrar Ajuda</string>
     <string name="help_title">Guia do Usuário D·A·M·N</string>

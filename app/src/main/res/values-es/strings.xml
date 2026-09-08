@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">Política de privacidad</string>
     <string name="advanced_experimental">Avanzado (Experimental)</string>
-    <string name="experimental_warning">¿Quieres bloquear la aplicación? Porque así es como bloqueas la aplicación.</string>
+    <string name="experimental_warning">¿Quieres bloquear la aplicación? ¡Porque así es como bloqueas la aplicación! El servidor PHP y el Listener no pueden ejecutarse al mismo tiempo. ¡Uno o ninguno, pero no ambos!</string>
     <string name="terminal_welcome">D·A·M·N listo.</string>
     <string name="help_desc">Mostrar ayuda</string>
     <string name="help_title">Guía del usuario de D·A·M·N</string>

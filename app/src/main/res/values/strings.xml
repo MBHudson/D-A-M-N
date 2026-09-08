@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="advanced_experimental">Advanced (Experimental)</string>
-    <string name="experimental_warning">Do you want to crash the app, because this is how you crash the app?</string>
+    <string name="experimental_warning">Do you want to crash the app, because this is how you crash the app?! Both PHP Server and Listener can\'t run at the same time. One or none but not both!</string>
     <string name="terminal_welcome">D·A·M·N ready.</string>
     <string name="help_desc">Show Help</string>
     <string name="help_title">D·A·M·N User Guide</string>

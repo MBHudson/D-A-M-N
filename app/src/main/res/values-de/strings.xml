@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">Datenschutzrichtlinie</string>
     <string name="advanced_experimental">Fortgeschritten (Experimentell)</string>
-    <string name="experimental_warning">Möchten Sie die App zum Absturz bringen? Denn so bringen Sie die App zum Absturz.</string>
+    <string name="experimental_warning">Möchten Sie die App zum Absturz bringen? Denn so bringen Sie die App zum Absturz! PHP-Server und Listener können nicht gleichzeitig ausgeführt werden. Einer oder keiner, aber nicht beide!</string>
     <string name="terminal_welcome">D·A·M·N bereit.</string>
     <string name="help_desc">Hilfe anzeigen</string>
     <string name="help_title">D·A·M·N Benutzerhandbuch</string>

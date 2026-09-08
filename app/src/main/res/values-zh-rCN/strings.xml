@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="advanced_experimental">高级 (实验性)</string>
-    <string name="experimental_warning">你想让应用崩溃吗？因为这就是让应用崩溃的方法。</string>
+    <string name="experimental_warning">你想让应用崩溃吗？因为这就是让应用崩溃的方法！PHP 服务器和监听器不能同时运行。只能选择其中之一，或者都不选！</string>
     <string name="terminal_welcome">D·A·M·N 就绪。</string>
     <string name="help_desc">显示帮助</string>
     <string name="help_title">D·A·M·N 用户指南</string>

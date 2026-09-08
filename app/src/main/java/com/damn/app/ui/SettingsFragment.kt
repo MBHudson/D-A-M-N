@@ -97,24 +97,38 @@ class SettingsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeL
         binding.headerTor.setOnClickListener { toggle(binding.contentTor, binding.chevronTor) }
         binding.headerNgrok.setOnClickListener { toggle(binding.contentNgrok, binding.chevronNgrok) }
         binding.headerCloudflare.setOnClickListener { toggle(binding.contentCloudflare, binding.chevronCloudflare) }
-        binding.headerAdvanced.setOnClickListener {
-            if (binding.contentAdvanced.visibility == View.GONE) {
-                MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_DAMN_Dialog)
-                    .setTitle("Proceed?")
-                    .setMessage(R.string.experimental_warning)
-                    .setPositiveButton("Yes") { _, _ -> toggle(binding.contentAdvanced, binding.chevronAdvanced) }
-                    .setNegativeButton("No", null)
-                    .show()
-            } else {
-                toggle(binding.contentAdvanced, binding.chevronAdvanced)
-            }
-        }
+        binding.headerAdvanced.setOnClickListener { toggle(binding.contentAdvanced, binding.chevronAdvanced) }
         binding.headerAbout.setOnClickListener { toggle(binding.contentAbout, binding.chevronAbout) }
 
         binding.resetBtn.setOnClickListener { confirmReset() }
         binding.btnAboutApp.setOnClickListener { showAboutDialog() }
         binding.btnDeveloper.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N") }
         binding.btnPrivacyPolicy.setOnClickListener { openUrl("https://github.com/MBHudson/D-A-M-N/blob/main/PRIVACY.md") }
+
+        setupAdvancedMutualExclusion()
+    }
+
+    private fun setupAdvancedMutualExclusion() {
+        binding.phpSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && binding.listenerSwitch.isChecked && binding.phpSwitch.isPressed) {
+                binding.listenerSwitch.isChecked = false
+                showExperimentalConflictWarning()
+            }
+        }
+        binding.listenerSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && binding.phpSwitch.isChecked && binding.listenerSwitch.isPressed) {
+                binding.phpSwitch.isChecked = false
+                showExperimentalConflictWarning()
+            }
+        }
+    }
+
+    private fun showExperimentalConflictWarning() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_DAMN_Dialog)
+            .setTitle("Proceed?")
+            .setMessage(R.string.experimental_warning)
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun confirmReset() {

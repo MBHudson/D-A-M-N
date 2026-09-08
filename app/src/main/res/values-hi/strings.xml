@@ -47,7 +47,7 @@
     <string name="developer_name">ब्राइस हडसन</string>
     <string name="privacy_policy">गोपनीयता नीति</string>
     <string name="advanced_experimental">उन्नत (प्रायोगिक)</string>
-    <string name="experimental_warning">क्या आप ऐप को क्रैश करना चाहते हैं? क्योंकि इस तरह ऐप क्रैश होता है।</string>
+    <string name="experimental_warning">क्या आप ऐप को क्रैश करना चाहते हैं? क्योंकि इस तरह ऐप क्रैश होता है! PHP सर्वर और लिसनर एक ही समय में नहीं चल सकते। एक या कोई नहीं लेकिन दोनों नहीं!</string>
     <string name="terminal_welcome">D·A·M·N तैयार है।</string>
     <string name="help_desc">सहायता दिखाएं</string>
     <string name="help_title">D·A·M·N उपयोगकर्ता मार्गदर्शिका</string>

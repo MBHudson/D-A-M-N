@@ -47,7 +47,7 @@
     <string name="developer_name">Bryce Hudson</string>
     <string name="privacy_policy">Politique de confidentialité</string>
     <string name="advanced_experimental">Avancé (Expérimental)</string>
-    <string name="experimental_warning">Voulez-vous faire planter l\'application ? Parce que c\'est comme ça qu\'on fait planter l\'application.</string>
+    <string name="experimental_warning">Voulez-vous faire planter l\'application ? Parce que c\'est comme ça qu\'on fait planter l\'application ! Le serveur PHP et le Listener ne peuvent pas fonctionner en même temps. L\'un ou l\'autre, mais pas les deux !</string>
     <string name="terminal_welcome">D·A·M·N prêt.</string>
     <string name="help_desc">Afficher l\'aide</string>
     <string name="help_title">Guide de l\'utilisateur D·A·M·N</string>
