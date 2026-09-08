@@ -3,24 +3,6 @@
 <h1> Drop Any Media Now </h1>
 <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Privacy Notice for <bdt class="question noTranslate">__________</bdt><bdt class="block-component"></bdt> (<bdt class="block-component"></bdt>"<strong>we</strong>," "<strong>us</strong>," or "<strong>our</strong>"<bdt class="statement-end-if-in-editor"></bdt></span><span data-custom-class="body_text">), describes how and why we might access, collect, store, use, and/or share (<bdt class="block-component"></bdt>"<strong>process</strong>"<bdt class="statement-end-if-in-editor"></bdt>) your personal information when you use our services (<bdt class="block-component"></bdt>"<strong>Services</strong>"<bdt class="statement-end-if-in-editor"></bdt>), including when you:</span></span></span><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span><div><bdt class="block-component"><span style="font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Download and use<bdt class="block-component"></bdt> our mobile application<bdt class="block-component"></bdt> (<bdt class="question noTranslate">Drop Any Media Now)<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor">,</bdt></span></span></span></span></span></span></span></span></bdt></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"><bdt class="block-component"> or any other application of ours that links to this Privacy Notice</bdt></bdt></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Use <bdt class="question noTranslate">Drop Any Media Now</bdt>. <bdt class="question">Drop Any Media Now – Direct Mobile Hosting
 
-Drop Any Media Now (D·A·M·N) is a professional-grade utility that transforms your Android device into a powerful, private web server. Share files and folders directly from your phone without relying on third-party cloud providers, trackers, or middleman servers.
-
-NO ROOT REQUIRED Host on your own terms. Tor Browser, Cloudflare, and Ngrok are supported but entirely optional.
-
-
-Host Anywhere: Overcome Carrier Limitations
-
-Mobile carriers often place devices behind strict firewalls and CGNAT (Carrier-Grade NAT), making traditional hosting impossible. D·A·M·N provides professional-grade tunneling to ensure your content is reachable globally:
-•Cloudflare &amp; Ngrok Integration: Create secure, public tunnels instantly. Even on restrictive LTE/5G networks, these integrations provide a stable URL for global access.
-•UPnP / NAT-PMP: Automatically configure your home router to open necessary ports, providing a direct public IP without manual setup.
-Total Anonymity with Tor Hidden Services
-Privacy is the core of the D·A·M·N architecture. With one-click Tor hosting, you can launch a hidden service that generates a unique .onion address:
-•Zero Trace: Your physical location and IP address remain hidden behind the Tor network.
-•Encrypted by Design: D·A·M·N leverages industry-standard protocols like Tor (Onion Routing) to provide secure, end-to-end encrypted connections.
-•Encrypted in Transit: Public tunnels via Cloudflare and Ngrok ensure your data is always encrypted while in transit, protecting your files from local network eavesdropping.
-•Censorship Resistance: Designed to bypass aggressive firewalls and network filters.
-
-
 Professional Hosting Features
 
 •Integrated PHP Engine: Includes a lightweight, native PHP engine to render scripts and serve dynamic content directly from your device.
