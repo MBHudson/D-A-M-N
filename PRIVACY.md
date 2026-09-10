@@ -19,7 +19,7 @@ The app requests several permissions to function as a server:
 
 ## 3. Third-Party Services
 When you enable specific sharing features, the following third-party services are involved. Their respective privacy policies apply:
-*   **Tor (Guardian Project)**: Used to provide an anonymous `.onion` address. [Tor Privacy Policy](https://www.torproject.org/about/privacy/)
+*   **Tor (Guardian Project)**: Used to provide an anonymous `.onion` address. [Tor Privacy Policy](https://www.torproject.org/about/privacy_policy/)
 *   **Ngrok**: Used to create a secure tunnel for public access. [Ngrok Privacy Policy](https://ngrok.com/privacy)
 *   **Cloudflare (Cloudflared)**: Used to create a tunnel via the Cloudflare network. [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
 
