@@ -48,3 +48,6 @@ res/layout/    - UI Layouts
 ./gradlew assembleDebug
 ```
 Requires Android SDK 35+, JDK 17+, and Gradle 8.x.
+
+### License
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the [LICENSE](file:///C:/Users/BinBash/Documents/DAMN-UI/LICENSE) file for details.
